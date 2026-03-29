@@ -1,22 +1,27 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
 import { useParams } from "next/navigation";
-import { doc, getDoc } from "firebase/firestore";
+import {
+  doc,
+  getDoc,
+  collection,
+  addDoc,
+  serverTimestamp,
+} from "firebase/firestore";
 import { db } from "@/lib/firebase";
-
-interface LeadData {
-  name: string;
-  company: string;
-  score: number;
-  status: string;
-}
+import type { LeadData } from "@/types/lead";
 
 export default function DealRoom() {
   const { leadId } = useParams<{ leadId: string }>();
   const [lead, setLead] = useState<LeadData | null>(null);
   const [loading, setLoading] = useState(true);
+  const [notFound, setNotFound] = useState(false);
+  const [error, setError] = useState<string | null>(null);
   const [toastVisible, setToastVisible] = useState(false);
+  const [toastMessage, setToastMessage] = useState({ title: "", body: "" });
+  const [requesting, setRequesting] = useState(false);
+  const [alreadyRequested, setAlreadyRequested] = useState(false);
 
   useEffect(() => {
     async function fetchLead() {
@@ -30,9 +35,12 @@ export default function DealRoom() {
             score: d.score ?? 0,
             status: d.status ?? "",
           });
+        } else {
+          setNotFound(true);
         }
       } catch (err) {
         console.error("Failed to fetch lead:", err);
+        setError("Unable to load deal details. Please try again later.");
       } finally {
         setLoading(false);
       }
@@ -40,11 +48,43 @@ export default function DealRoom() {
     if (leadId) fetchLead();
   }, [leadId]);
 
-  function handleEscrowRequest() {
-    setToastVisible(true);
-    setTimeout(() => setToastVisible(false), 4000);
+  const showToast = useCallback(
+    (title: string, body: string) => {
+      setToastMessage({ title, body });
+      setToastVisible(true);
+      setTimeout(() => setToastVisible(false), 5000);
+    },
+    []
+  );
+
+  async function handleEscrowRequest() {
+    if (requesting || alreadyRequested) return;
+    setRequesting(true);
+    try {
+      await addDoc(collection(db, "escrow_requests"), {
+        leadId,
+        leadName: lead?.name ?? "Unknown",
+        leadCompany: lead?.company ?? "",
+        requestedAt: serverTimestamp(),
+        status: "pending",
+      });
+      setAlreadyRequested(true);
+      showToast(
+        "Request Sent",
+        "Our team will send escrow details within 24 hours."
+      );
+    } catch (err) {
+      console.error("Escrow request failed:", err);
+      showToast(
+        "Request Failed",
+        "Something went wrong. Please try again."
+      );
+    } finally {
+      setRequesting(false);
+    }
   }
 
+  /* ── Loading state ── */
   if (loading) {
     return (
       <div className="flex min-h-screen items-center justify-center bg-zinc-950">
@@ -53,6 +93,53 @@ export default function DealRoom() {
     );
   }
 
+  /* ── Error state ── */
+  if (error) {
+    return (
+      <div className="flex min-h-screen flex-col items-center justify-center gap-4 bg-zinc-950 px-6 text-center">
+        <div className="flex h-16 w-16 items-center justify-center rounded-2xl bg-red-500/10 ring-1 ring-red-500/20">
+          <svg className="h-8 w-8 text-red-400" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor">
+            <path strokeLinecap="round" strokeLinejoin="round" d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126ZM12 15.75h.007v.008H12v-.008Z" />
+          </svg>
+        </div>
+        <h1 className="text-xl font-bold text-white">Something went wrong</h1>
+        <p className="max-w-md text-sm text-zinc-400">{error}</p>
+        <button
+          onClick={() => window.location.reload()}
+          className="mt-2 rounded-lg bg-zinc-800 px-5 py-2 text-sm font-medium text-zinc-300 transition-colors hover:bg-zinc-700"
+        >
+          Try Again
+        </button>
+      </div>
+    );
+  }
+
+  /* ── Not found state ── */
+  if (notFound || !lead) {
+    return (
+      <div className="flex min-h-screen flex-col items-center justify-center gap-4 bg-zinc-950 px-6 text-center">
+        <div className="flex h-16 w-16 items-center justify-center rounded-2xl bg-amber-500/10 ring-1 ring-amber-500/20">
+          <svg className="h-8 w-8 text-amber-400" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor">
+            <path strokeLinecap="round" strokeLinejoin="round" d="m21 21-5.197-5.197m0 0A7.5 7.5 0 1 0 5.196 5.196a7.5 7.5 0 0 0 10.607 10.607Z" />
+          </svg>
+        </div>
+        <h1 className="text-xl font-bold text-white">Deal not found</h1>
+        <p className="max-w-md text-sm text-zinc-400">
+          The deal room you&rsquo;re looking for doesn&rsquo;t exist or the link
+          may have expired. Please contact your relationship manager for an
+          updated link.
+        </p>
+        <a
+          href="/"
+          className="mt-2 rounded-lg bg-zinc-800 px-5 py-2 text-sm font-medium text-zinc-300 transition-colors hover:bg-zinc-700"
+        >
+          Back to Home
+        </a>
+      </div>
+    );
+  }
+
+  /* ── Deal Room ── */
   return (
     <div className="relative min-h-screen bg-zinc-950 text-zinc-100 overflow-hidden">
       {/* Background gradient blobs */}
@@ -66,11 +153,10 @@ export default function DealRoom() {
             Empathy Manor{" "}
             <span className="text-zinc-500 font-medium">| Deal&nbsp;Room</span>
           </h1>
-          {lead && (
-            <span className="text-sm text-zinc-400">
-              Welcome, <span className="text-white font-medium">{lead.name}</span>
-            </span>
-          )}
+          <span className="text-sm text-zinc-400">
+            Welcome,{" "}
+            <span className="text-white font-medium">{lead.name}</span>
+          </span>
         </div>
       </header>
 
@@ -136,7 +222,10 @@ export default function DealRoom() {
                     "FEM Limited property management included",
                     "Full legal title & Governor's Consent available",
                   ].map((item) => (
-                    <li key={item} className="flex items-start gap-2 text-sm text-zinc-300">
+                    <li
+                      key={item}
+                      className="flex items-start gap-2 text-sm text-zinc-300"
+                    >
                       <span className="mt-0.5 text-emerald-500">✓</span>
                       {item}
                     </li>
@@ -155,7 +244,10 @@ export default function DealRoom() {
                     "Exit liquidity available after 24-month lock-in",
                     "Transparent fee structure — no hidden costs",
                   ].map((item) => (
-                    <li key={item} className="flex items-start gap-2 text-sm text-zinc-300">
+                    <li
+                      key={item}
+                      className="flex items-start gap-2 text-sm text-zinc-300"
+                    >
                       <span className="mt-0.5 text-violet-500">✓</span>
                       {item}
                     </li>
@@ -168,16 +260,37 @@ export default function DealRoom() {
             <div className="mt-10 flex flex-col items-start gap-4 sm:flex-row sm:items-center">
               <button
                 onClick={handleEscrowRequest}
-                className="group relative inline-flex items-center gap-2 overflow-hidden rounded-xl bg-emerald-600 px-7 py-3.5 text-sm font-semibold text-white shadow-lg shadow-emerald-600/20 transition-all hover:bg-emerald-500 hover:shadow-emerald-500/30 active:scale-[0.98]"
+                disabled={requesting || alreadyRequested}
+                className="group relative inline-flex items-center gap-2 overflow-hidden rounded-xl bg-emerald-600 px-7 py-3.5 text-sm font-semibold text-white shadow-lg shadow-emerald-600/20 transition-all hover:bg-emerald-500 hover:shadow-emerald-500/30 active:scale-[0.98] disabled:opacity-60 disabled:pointer-events-none"
               >
                 <span className="absolute inset-0 -translate-x-full bg-gradient-to-r from-transparent via-white/10 to-transparent transition-transform duration-700 group-hover:translate-x-full" />
-                <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M16.5 10.5V6.75a4.5 4.5 0 1 0-9 0v3.75m-.75 11.25h10.5a2.25 2.25 0 0 0 2.25-2.25v-6.75a2.25 2.25 0 0 0-2.25-2.25H6.75a2.25 2.25 0 0 0-2.25 2.25v6.75a2.25 2.25 0 0 0 2.25 2.25Z" />
-                </svg>
-                Request Escrow Details
+                {requesting ? (
+                  <div className="h-5 w-5 animate-spin rounded-full border-2 border-white/30 border-t-white" />
+                ) : (
+                  <svg
+                    className="h-5 w-5"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    strokeWidth={2}
+                    stroke="currentColor"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      d="M16.5 10.5V6.75a4.5 4.5 0 1 0-9 0v3.75m-.75 11.25h10.5a2.25 2.25 0 0 0 2.25-2.25v-6.75a2.25 2.25 0 0 0-2.25-2.25H6.75a2.25 2.25 0 0 0-2.25 2.25v6.75a2.25 2.25 0 0 0 2.25 2.25Z"
+                    />
+                  </svg>
+                )}
+                {alreadyRequested
+                  ? "Request Sent ✓"
+                  : requesting
+                    ? "Sending…"
+                    : "Request Escrow Details"}
               </button>
               <p className="text-xs text-zinc-500">
-                A dedicated relationship manager will contact you within 24 hours.
+                {alreadyRequested
+                  ? "You'll hear from us within 24 hours."
+                  : "A dedicated relationship manager will contact you within 24 hours."}
               </p>
             </div>
           </div>
@@ -192,17 +305,55 @@ export default function DealRoom() {
             : "translate-y-4 opacity-0 pointer-events-none"
         }`}
       >
-        <div className="flex items-center gap-3 rounded-xl border border-emerald-500/20 bg-zinc-900/90 px-5 py-3.5 shadow-2xl backdrop-blur-lg">
-          <span className="flex h-8 w-8 items-center justify-center rounded-full bg-emerald-500/20">
-            <svg className="h-4 w-4 text-emerald-400" fill="none" viewBox="0 0 24 24" strokeWidth={2.5} stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" d="m4.5 12.75 6 6 9-13.5" />
-            </svg>
+        <div
+          className={`flex items-center gap-3 rounded-xl border px-5 py-3.5 shadow-2xl backdrop-blur-lg ${
+            toastMessage.title === "Request Failed"
+              ? "border-red-500/20 bg-zinc-900/90"
+              : "border-emerald-500/20 bg-zinc-900/90"
+          }`}
+        >
+          <span
+            className={`flex h-8 w-8 items-center justify-center rounded-full ${
+              toastMessage.title === "Request Failed"
+                ? "bg-red-500/20"
+                : "bg-emerald-500/20"
+            }`}
+          >
+            {toastMessage.title === "Request Failed" ? (
+              <svg
+                className="h-4 w-4 text-red-400"
+                fill="none"
+                viewBox="0 0 24 24"
+                strokeWidth={2.5}
+                stroke="currentColor"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  d="M6 18 18 6M6 6l12 12"
+                />
+              </svg>
+            ) : (
+              <svg
+                className="h-4 w-4 text-emerald-400"
+                fill="none"
+                viewBox="0 0 24 24"
+                strokeWidth={2.5}
+                stroke="currentColor"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  d="m4.5 12.75 6 6 9-13.5"
+                />
+              </svg>
+            )}
           </span>
           <div>
-            <p className="text-sm font-semibold text-white">Request Sent</p>
-            <p className="text-xs text-zinc-400">
-              Our team will send escrow details shortly.
+            <p className="text-sm font-semibold text-white">
+              {toastMessage.title}
             </p>
+            <p className="text-xs text-zinc-400">{toastMessage.body}</p>
           </div>
         </div>
       </div>

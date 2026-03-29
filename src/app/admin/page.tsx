@@ -11,13 +11,7 @@ import type { User } from "firebase/auth";
 import { db, auth } from "@/lib/firebase";
 
 /* ── Types ── */
-interface Lead {
-  id: string;
-  name: string;
-  company: string;
-  score: number;
-  status: string;
-}
+import type { Lead } from "@/types/lead";
 
 /* ── Constants ── */
 const statusColors: Record<string, string> = {
@@ -250,6 +244,7 @@ export default function AdminDashboard() {
   const [authLoading, setAuthLoading] = useState(true);
   const [leads, setLeads] = useState<Lead[]>([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
   /* Listen to auth state */
   useEffect(() => {
@@ -277,6 +272,7 @@ export default function AdminDashboard() {
         setLeads(data);
       } catch (err) {
         console.error("Failed to fetch leads:", err);
+        setError("Failed to load leads from database. Please check your permissions or try again.");
       } finally {
         setLoading(false);
       }
@@ -296,6 +292,27 @@ export default function AdminDashboard() {
   /* Not authenticated → show login */
   if (!user) {
     return <AdminLogin onSuccess={() => {}} />;
+  }
+
+  /* Handle Errors loading data */
+  if (error) {
+    return (
+      <div className="flex min-h-screen flex-col items-center justify-center gap-4 bg-zinc-950 px-6 text-center">
+        <div className="flex h-16 w-16 items-center justify-center rounded-2xl bg-red-500/10 ring-1 ring-red-500/20">
+          <svg className="h-8 w-8 text-red-400" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor">
+            <path strokeLinecap="round" strokeLinejoin="round" d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126ZM12 15.75h.007v.008H12v-.008Z" />
+          </svg>
+        </div>
+        <h1 className="text-xl font-bold text-white">Something went wrong</h1>
+        <p className="max-w-md text-sm text-zinc-400">{error}</p>
+        <button
+          onClick={() => window.location.reload()}
+          className="mt-2 rounded-lg bg-zinc-800 px-5 py-2 text-sm font-medium text-zinc-300 transition-colors hover:bg-zinc-700"
+        >
+          Try Again
+        </button>
+      </div>
+    );
   }
 
   /* Authenticated → show dashboard */
