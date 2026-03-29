@@ -1,135 +1,171 @@
-"use client";
-
 import Image from "next/image";
 import Link from "next/link";
 
 export default function Home() {
   return (
-    <div className="flex min-h-screen flex-col bg-zinc-950 text-zinc-100 font-sans selection:bg-emerald-500/30">
-      
-      {/* ── Header ── */}
-      <header className="sticky top-0 z-50 border-b border-zinc-800/60 bg-zinc-950/80 backdrop-blur-md">
-        <div className="mx-auto flex max-w-7xl items-center justify-between px-6 py-4">
-          <div className="flex items-center gap-2">
-            <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-emerald-500/10 ring-1 ring-emerald-500/20">
-              <svg className="h-4 w-4 text-emerald-400" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" d="M3.75 21h16.5M4.5 3h15M5.25 3v18m13.5-18v18M9 6.75h1.5m-1.5 3h1.5m-1.5 3h1.5m3-6H15m-1.5 3H15m-1.5 3H15M9 21v-3.375c0-.621.504-1.125 1.125-1.125h3.75c.621 0 1.125.504 1.125 1.125V21" />
-              </svg>
-            </div>
-            <span className="text-xl font-bold tracking-tight text-white">
-              Empathy Manor
-            </span>
-          </div>
-          <div className="flex items-center gap-4">
-            <Link 
-              href="/admin" 
-              className="text-sm font-medium text-zinc-400 hover:text-white transition-colors"
+    <div className="min-h-screen bg-slate-950 text-slate-50 font-sans selection:bg-emerald-500/30">
+      {/* Navbar skeleton */}
+      <nav className="fixed top-0 left-0 right-0 z-50 py-6 px-6 lg:px-12 flex justify-between items-center backdrop-blur-md bg-slate-950/50 border-b border-slate-800/50">
+        <div className="text-xl font-semibold tracking-wide text-transparent bg-clip-text bg-gradient-to-r from-emerald-100 to-emerald-400">
+          EMPATHY MANOR
+        </div>
+        <div className="hidden md:flex space-x-8 text-sm text-slate-300">
+          <Link href="#value-prop" className="hover:text-emerald-300 transition-colors">Our Edge</Link>
+          <Link href="#mandate" className="hover:text-emerald-300 transition-colors">Current Mandates</Link>
+          <Link href="#contact" className="hover:text-emerald-300 transition-colors">Contact</Link>
+        </div>
+      </nav>
+
+      {/* Hero Section */}
+      <header className="relative pt-32 pb-20 md:pt-48 md:pb-32 px-6 lg:px-12 overflow-hidden flex flex-col justify-center min-h-[90vh]">
+        {/* Abstract background gradient */}
+        <div className="absolute top-1/4 -right-1/4 w-96 h-96 bg-emerald-600/20 rounded-full blur-[128px] pointer-events-none"></div>
+        <div className="absolute bottom-0 -left-1/4 w-[30rem] h-[30rem] bg-slate-800/40 rounded-full blur-[128px] pointer-events-none"></div>
+        
+        <div className="relative z-10 max-w-4xl mx-auto text-center space-y-8">
+          <h1 className="text-5xl md:text-7xl font-light tracking-tight text-white leading-[1.1]">
+            Home Ownership, <br className="hidden md:block"/>
+            <span className="font-medium text-transparent bg-clip-text bg-gradient-to-r from-emerald-200 to-emerald-500">Simplified for the Diaspora.</span>
+          </h1>
+          <p className="text-lg md:text-xl text-slate-300 max-w-2xl mx-auto leading-relaxed">
+            Secure high-yield real estate in Lagos, Nigeria with zero boots-on-the-ground stress. Turnkey acquisition, verified titles, and professional management.
+          </p>
+          <div className="pt-6">
+            <a 
+              href="#mandate" 
+              className="inline-flex items-center justify-center px-8 py-4 text-sm font-medium tracking-wide text-slate-950 bg-emerald-400 rounded-full hover:bg-emerald-300 transition-all duration-300 shadow-[0_0_30px_-5px_var(--color-emerald-500)] hover:shadow-[0_0_40px_-5px_var(--color-emerald-400)] hover:-translate-y-1"
             >
-              Partner Login
-            </Link>
+              Explore Opportunities
+            </a>
           </div>
         </div>
       </header>
 
-      {/* ── Hero Section ── */}
-      <main className="relative flex flex-1 flex-col items-center justify-center overflow-hidden px-6 py-24 sm:py-32">
-        {/* Background Gradients */}
-        <div className="pointer-events-none absolute left-1/2 top-1/2 -z-10 h-[600px] w-[600px] -translate-x-1/2 -translate-y-1/2 rounded-full bg-emerald-600/10 blur-[120px]" />
-        <div className="pointer-events-none absolute right-0 top-0 -z-10 h-[400px] w-[400px] rounded-full bg-violet-600/10 blur-[100px]" />
-
-        <div className="mx-auto max-w-4xl text-center">
-          <span className="inline-flex items-center gap-2 rounded-full border border-emerald-500/20 bg-emerald-500/10 px-4 py-1.5 text-sm font-medium text-emerald-400 backdrop-blur-md">
-            <span className="relative flex h-2 w-2">
-              <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-emerald-400 opacity-75"></span>
-              <span className="relative inline-flex h-2 w-2 rounded-full bg-emerald-500"></span>
-            </span>
-            Premium Real Estate Opportunities
-          </span>
-
-          <h1 className="mt-8 text-5xl font-extrabold tracking-tight text-white sm:text-7xl">
-            Build Wealth Back Home.
-            <br />
-            <span className="text-transparent bg-clip-text bg-gradient-to-r from-emerald-400 to-teal-600">
-              Securely.
-            </span>
-          </h1>
-
-          <p className="mt-8 mx-auto max-w-2xl text-lg text-zinc-400 sm:text-xl leading-relaxed">
-            Exclusive access to vetted, high-yield luxury properties in Nigeria's most prestigious gated communities. Designed specifically for the diaspora.
-          </p>
-
-          <div className="mt-12 flex flex-col items-center justify-center gap-4 sm:flex-row">
-            <button className="group relative inline-flex items-center gap-2 overflow-hidden rounded-xl bg-white px-8 py-4 text-sm font-semibold text-zinc-950 transition-all hover:bg-zinc-200 active:scale-[0.98]">
-              Apply for Access
-              <svg className="h-4 w-4 transition-transform group-hover:translate-x-1" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" d="M13.5 4.5 21 12m0 0-7.5 7.5M21 12H3" />
-              </svg>
-            </button>
-            <button className="inline-flex items-center gap-2 rounded-xl border border-zinc-700 bg-zinc-800/50 px-8 py-4 text-sm font-semibold text-white backdrop-blur-md transition-all hover:bg-zinc-800">
-              View Portfolio
-            </button>
+      {/* Value Proposition Section */}
+      <section id="value-prop" className="py-24 px-6 lg:px-12 bg-slate-900/50 border-t border-slate-800/50">
+        <div className="max-w-7xl mx-auto">
+          <div className="text-center mb-16">
+            <h2 className="text-3xl md:text-4xl font-light tracking-tight mb-4 text-white">The Empathy Advantage</h2>
+            <div className="h-1 w-12 bg-emerald-500 mx-auto rounded-full"></div>
           </div>
-          <p className="mt-6 text-sm text-zinc-500">
-            Available strictly by invitation or application.
-          </p>
-        </div>
-      </main>
-
-      {/* ── Features Grid ── */}
-      <section className="border-t border-zinc-800/60 bg-zinc-900/30 py-24">
-        <div className="mx-auto max-w-7xl px-6 lg:px-8">
-          <div className="mb-16 text-center">
-            <h2 className="text-3xl font-bold tracking-tight text-white sm:text-4xl">
-              Why Invest With Empathy Manor
-            </h2>
-          </div>
-          <div className="grid grid-cols-1 gap-8 md:grid-cols-3">
-            {[
-              {
-                title: "Vetted Properties",
-                desc: "We only list properties with verified titles, Governor's Consent, and strict legal due diligence.",
-                icon: (
-                  <svg className="h-6 w-6 text-emerald-400" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" d="M9 12.75 11.25 15 15 9.75M21 12c0 1.268-.63 2.39-1.593 3.068a3.745 3.745 0 0 1-1.043 3.296 3.745 3.745 0 0 1-3.296 1.043A3.745 3.745 0 0 1 12 21c-1.268 0-2.39-.63-3.068-1.593a3.746 3.746 0 0 1-3.296-1.043 3.745 3.745 0 0 1-1.043-3.296A3.745 3.745 0 0 1 3 12c0-1.268.63-2.39 1.593-3.068a3.745 3.745 0 0 1 1.043-3.296 3.746 3.746 0 0 1 3.296-1.043A3.746 3.746 0 0 1 12 3c1.268 0 2.39.63 3.068 1.593a3.746 3.746 0 0 1 3.296 1.043 3.746 3.746 0 0 1 1.043 3.296A3.745 3.745 0 0 1 21 12Z" />
-                  </svg>
-                )
-              },
-              {
-                title: "Complete Transparency",
-                desc: "Monitor your investments remotely. See projected yields, access real-time construction updates, and view your escrow status securely.",
-                icon: (
-                  <svg className="h-6 w-6 text-sky-400" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" d="M3.75 3v11.25A2.25 2.25 0 0 0 6 16.5h2.25M3.75 3h-1.5m1.5 0h16.5m0 0h1.5m-1.5 0v11.25A2.25 2.25 0 0 1 19.5 16.5h-2.25m-10.5 0h7.5m-7.5 0-1 3m8.5-3 1 3m0 0 .5 1.5m-.5-1.5h-9.5m0 0-.5 1.5m.75-9 3-3 2.148 2.148A12.061 12.061 0 0 1 16.5 7.605" />
-                  </svg>
-                )
-              },
-              {
-                title: "Secure Escrow",
-                desc: "Your funds are protected. Investments are held in verified escrow accounts and only disbursed upon verified project milestones.",
-                icon: (
-                  <svg className="h-6 w-6 text-violet-400" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" d="M16.5 10.5V6.75a4.5 4.5 0 1 0-9 0v3.75m-.75 11.25h10.5a2.25 2.25 0 0 0 2.25-2.25v-6.75a2.25 2.25 0 0 0-2.25-2.25H6.75a2.25 2.25 0 0 0-2.25 2.25v6.75a2.25 2.25 0 0 0 2.25 2.25Z" />
-                  </svg>
-                )
-              }
-            ].map((feature, idx) => (
-              <div key={idx} className="rounded-2xl border border-zinc-800 bg-zinc-900/50 p-8 hover:bg-zinc-800/50 transition-colors">
-                <div className="mb-4 flex h-12 w-12 items-center justify-center rounded-xl bg-zinc-800">
-                  {feature.icon}
-                </div>
-                <h3 className="mb-2 text-xl font-semibold text-white">{feature.title}</h3>
-                <p className="text-zinc-400 leading-relaxed">{feature.desc}</p>
+          
+          <div className="grid md:grid-cols-3 gap-8">
+            {/* Column 1 */}
+            <div className="p-8 rounded-2xl bg-slate-900/80 border border-slate-800 backdrop-blur-sm hover:border-emerald-500/30 transition-colors group">
+              <div className="w-12 h-12 rounded-full bg-emerald-500/10 flex items-center justify-center mb-6 text-emerald-400 group-hover:scale-110 transition-transform">
+                <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
               </div>
-            ))}
+              <h3 className="text-xl font-medium mb-3 text-emerald-50">The NGN/USD Arbitrage</h3>
+              <p className="text-slate-400 leading-relaxed text-sm">
+                Leveraging currency strength for 12-15% yields. Build generational wealth faster by applying hard currency leverage in a rapidly growing emerging market.
+              </p>
+            </div>
+
+            {/* Column 2 */}
+            <div className="p-8 rounded-2xl bg-slate-900/80 border border-slate-800 backdrop-blur-sm hover:border-emerald-500/30 transition-colors group">
+              <div className="w-12 h-12 rounded-full bg-emerald-500/10 flex items-center justify-center mb-6 text-emerald-400 group-hover:scale-110 transition-transform">
+                <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
+                </svg>
+              </div>
+              <h3 className="text-xl font-medium mb-3 text-emerald-50">Ironclad Security</h3>
+              <p className="text-slate-400 leading-relaxed text-sm">
+                End-to-end title verification and escrow services. We eliminate the risk of fraud by managing all legal due diligence before a single dollar changes hands.
+              </p>
+            </div>
+
+            {/* Column 3 */}
+            <div className="p-8 rounded-2xl bg-slate-900/80 border border-slate-800 backdrop-blur-sm hover:border-emerald-500/30 transition-colors group">
+              <div className="w-12 h-12 rounded-full bg-emerald-500/10 flex items-center justify-center mb-6 text-emerald-400 group-hover:scale-110 transition-transform">
+                <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
+                </svg>
+              </div>
+              <h3 className="text-xl font-medium mb-3 text-emerald-50">Turnkey Management</h3>
+              <p className="text-slate-400 leading-relaxed text-sm">
+                Post-purchase tenant placement by our local execution partners. You collect the yield; we deal with the midnight maintenance calls and rent collection.
+              </p>
+            </div>
           </div>
         </div>
       </section>
 
-      {/* ── Footer ── */}
-      <footer className="border-t border-zinc-800/80 p-8 text-center bg-zinc-950">
-        <p className="text-sm text-zinc-500">
-          &copy; {new Date().getFullYear()} Empathy Manor Limited. All rights reserved.
-        </p>
+      {/* Current Mandate Section */}
+      <section id="mandate" className="py-24 px-6 lg:px-12 relative">
+        {/* Glow effect */}
+        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-3/4 h-64 bg-emerald-900/20 blur-[120px] rounded-full pointer-events-none"></div>
+        
+        <div className="max-w-5xl mx-auto relative z-10">
+          <div className="flex flex-col md:flex-row justify-between items-end mb-12">
+            <div>
+              <div className="text-emerald-400 text-sm font-semibold tracking-wider uppercase mb-2">Featured Opportunity</div>
+              <h2 className="text-3xl md:text-5xl font-light tracking-tight text-white">Current Mandate</h2>
+            </div>
+            <div className="mt-4 md:mt-0">
+              <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
+                Accepting Commitments
+              </span>
+            </div>
+          </div>
+          
+          {/* Featured Asset Card */}
+          <div className="rounded-3xl overflow-hidden bg-slate-900/60 border border-slate-800 backdrop-blur-md flex flex-col md:flex-row group">
+            {/* Mock Image Area (Can update to real Image component later) */}
+            <div className="md:w-1/2 h-64 md:h-auto bg-slate-800 relative overflow-hidden">
+              <div className="absolute inset-0 bg-gradient-to-t md:bg-gradient-to-r from-slate-900/90 to-transparent z-10"></div>
+              {/* Optional: Add a real image if you have one, or keep a stylish placeholder/gradient pattern */}
+              <div className="absolute inset-0 bg-[url('https://images.unsplash.com/photo-1600596542815-ffad4c1539a9?ixlib=rb-4.0.3&auto=format&fit=crop&w=1000&q=80')] bg-cover bg-center transition-transform duration-700 group-hover:scale-105 opacity-60 mix-blend-overlay"></div>
+            </div>
+            
+            <div className="md:w-1/2 p-8 md:p-12 flex flex-col justify-center">
+              <h3 className="text-2xl md:text-3xl font-medium text-white mb-2">Magodo GRA Phase 2 <br/>Luxury Duplex</h3>
+              <p className="text-slate-400 mb-8 text-sm leading-relaxed">
+                An ultra-premium, fully detached 5-bedroom duplex in one of the most secure and desirable enclaves in Lagos. High rental demand from expatriates and corporate executives ensures consistent, high-yield returns.
+              </p>
+              
+              <div className="grid grid-cols-2 gap-6 mb-8">
+                <div>
+                  <div className="text-xs text-slate-500 uppercase tracking-wider mb-1">Target Yield</div>
+                  <div className="text-lg text-emerald-400 font-semibold">12.5% p.a.</div>
+                </div>
+                <div>
+                  <div className="text-xs text-slate-500 uppercase tracking-wider mb-1">Status</div>
+                  <div className="text-lg text-white">Title Verified</div>
+                </div>
+              </div>
+              
+              <button className="w-full py-4 rounded-xl bg-slate-800 hover:bg-slate-700 text-white font-medium transition-colors border border-slate-700 hover:border-slate-600 flex justify-center items-center space-x-2">
+                <span>Request Escrow Details</span>
+                <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M14 5l7 7m0 0l-7 7m7-7H3" />
+                </svg>
+              </button>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* Footer */}
+      <footer id="contact" className="py-12 px-6 lg:px-12 border-t border-slate-800/80 bg-slate-950 mt-12">
+        <div className="max-w-7xl mx-auto flex flex-col md:flex-row justify-between items-center text-sm text-slate-500">
+          <div className="mb-4 md:mb-0">
+            <span className="font-semibold text-slate-300">EMPATHY MANOR</span> &copy; {new Date().getFullYear()}. All rights reserved.
+          </div>
+          <div className="flex space-x-6">
+            <a href="mailto:contact@empathymanor.com" className="hover:text-emerald-400 transition-colors">
+              contact@empathymanor.com
+            </a>
+            <span className="opacity-30">|</span>
+            <a href="#" className="hover:text-emerald-400 transition-colors">
+              Terms of Service
+            </a>
+            <a href="#" className="hover:text-emerald-400 transition-colors">
+              Privacy Policy
+            </a>
+          </div>
+        </div>
       </footer>
     </div>
   );
