@@ -1,6 +1,11 @@
 import { initializeApp, getApps, getApp } from "firebase/app";
+import type { FirebaseApp } from "firebase/app";
 import { getFirestore } from "firebase/firestore";
+import type { Firestore } from "firebase/firestore";
+import { getAuth } from "firebase/auth";
+import type { Auth } from "firebase/auth";
 import { getAnalytics, isSupported } from "firebase/analytics";
+import type { Analytics } from "firebase/analytics";
 
 const firebaseConfig = {
   apiKey: process.env.NEXT_PUBLIC_FIREBASE_API_KEY,
@@ -13,11 +18,17 @@ const firebaseConfig = {
 };
 
 // Initialize Firebase — prevent duplicate apps in hot-reload
-const app = !getApps().length ? initializeApp(firebaseConfig) : getApp();
-const db = getFirestore(app);
+const app: FirebaseApp = !getApps().length
+  ? initializeApp(firebaseConfig)
+  : getApp();
+
+const db: Firestore = getFirestore(app);
+const auth: Auth = getAuth(app);
 
 // Analytics — only in the browser (SSR-safe)
-const analytics =
-  typeof window !== "undefined" ? isSupported().then((yes) => (yes ? getAnalytics(app) : null)) : null;
+const analytics: Promise<Analytics | null> | null =
+  typeof window !== "undefined"
+    ? isSupported().then((yes) => (yes ? getAnalytics(app) : null))
+    : null;
 
-export { app, db, analytics };
+export { app, db, auth, analytics };
