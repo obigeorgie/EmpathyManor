@@ -1,36 +1,55 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Empathy Manor
+
+A premium real estate investment platform built for Empathy Manor, showcasing luxury properties in Lagos, Nigeria.
+
+## Features
+
+- **Premium Landing Page**: A sleek, dark-mode, responsive marketing page built with Next.js and Tailwind CSS designed to highlight the value proposition of real estate investments.
+- **Lead Generation**: A seamless Call-To-Action form connected directly to the database, allowing prospective investors to easily request an escrow or find out more.
+- **Admin Dashboard & CRM**: A protected internal dashboard for managing incoming leads and escrow requests.
+- **Secure Architecture**: Powered by Firebase Authentication and Firestore, with robust database security rules protecting CRM data and public entry points.
+
+## Tech Stack
+
+- **Core**: [Next.js](https://nextjs.org/) (React framework) and TypeScript.
+- **Styling**: [Tailwind CSS](https://tailwindcss.com/) for a sleek, responsive dark-mode aesthetic.
+- **Backend & Database**: [Firebase](https://firebase.google.com/) (Authentication and Cloud Firestore).
 
 ## Getting Started
 
-First, run the development server:
+### Prerequisites
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
-```
+Ensure you have [Node.js](https://nodejs.org/) installed. You will also need a Firebase project set up.
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+### Setup
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+1. **Install dependencies**:
+   ```bash
+   npm install
+   ```
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+2. **Configure Environment Variables**:
+   Copy `.env.example` to `.env.local` and fill in your Firebase project configuration credentials:
+   ```bash
+   cp .env.example .env.local
+   ```
+   *Make sure you provide valid `NEXT_PUBLIC_FIREBASE_*` values in `.env.local` for the application to function properly.*
 
-## Learn More
+3. **Start the Development Server**:
+   ```bash
+   npm run dev
+   ```
 
-To learn more about Next.js, take a look at the following resources:
+   Open [http://localhost:3000](http://localhost:3000) with your browser to view the application. The premium landing page will be instantly visible, while the secure admin dashboard is available at `/admin`.
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+## Project Structure
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+- `src/app/page.tsx`: The main public-facing landing page.
+- `src/app/admin/`: Secured admin dashboard routes and authentication flows.
+- `src/lib/firebase.js`: Firebase initialization and configuration linking the app to your database.
+- `src/types/`: Shared TypeScript definitions for end-to-end type safety.
+- `firestore.rules`: Security rules enforcing access control over the Firestore database.
 
-## Deploy on Vercel
+## Deployment
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+The easiest way to deploy this Next.js app is using the [Vercel Platform](https://vercel.com/new). Make sure to configure your environment variables (`NEXT_PUBLIC_FIREBASE_*`) within the Vercel dashboard prior to deployment so the app can successfully connect to Firebase in production.
