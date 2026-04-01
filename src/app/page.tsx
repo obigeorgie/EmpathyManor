@@ -1,4 +1,3 @@
-import Image from "next/image";
 import Link from "next/link";
 
 export default function Home() {
@@ -136,12 +135,12 @@ export default function Home() {
                 </div>
               </div>
               
-              <button className="w-full py-4 rounded-xl bg-slate-800 hover:bg-slate-700 text-white font-medium transition-colors border border-slate-700 hover:border-slate-600 flex justify-center items-center space-x-2">
+              <a href="mailto:admin@empathymanor.com?subject=Inquiry:%20Magodo%20GRA%20Phase%202%20Escrow" className="w-full py-4 rounded-xl bg-slate-800 hover:bg-slate-700 text-white font-medium transition-colors border border-slate-700 hover:border-slate-600 flex justify-center items-center space-x-2">
                 <span>Request Escrow Details</span>
                 <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M14 5l7 7m0 0l-7 7m7-7H3" />
                 </svg>
-              </button>
+              </a>
             </div>
           </div>
         </div>

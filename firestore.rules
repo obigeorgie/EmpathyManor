@@ -1,17 +1,31 @@
 rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
-    // Leads — any authenticated user can read; only admins can write
+
+    // ── Leads ──
+    // • get  (single doc) → open, so unauthenticated portal visitors
+    //   can load their Deal Room via the secret URL.
+    // • list (collection query) → authenticated only, protecting the
+    //   admin dashboard from public scraping.
+    // • write → authenticated only.
     match /empathy_leads/{leadId} {
-      allow read: if request.auth != null;
-      allow write: if request.auth != null
-                   && request.auth.token.admin == true;
+      allow get:   if true;
+      allow list:  if request.auth != null;
+      allow write: if request.auth != null;
     }
-    // Escrow requests — anyone can create (unauthenticated portal visitors);
-    // only authenticated users can read/update/delete
+
+    // ── Escrow Requests ──
+    // • create → open but schema-validated to prevent spam / junk writes.
+    //   Incoming doc must contain leadId (string), leadName (string),
+    //   and status must be exactly "pending".
+    // • read, update → authenticated only.
+    // • delete → not allowed by anyone (audit trail).
     match /escrow_requests/{requestId} {
-      allow create: if true;
-      allow read, update, delete: if request.auth != null;
+      allow create: if request.resource.data.keys().hasAll(['leadId', 'leadName', 'status'])
+                    && request.resource.data.leadId is string
+                    && request.resource.data.leadName is string
+                    && request.resource.data.status == 'pending';
+      allow read, update: if request.auth != null;
     }
   }
 }

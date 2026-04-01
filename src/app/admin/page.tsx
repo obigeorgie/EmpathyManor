@@ -5,6 +5,16 @@ import { auth, db } from "@/lib/firebase"; // Adjust path if your firebase.js/ts
 import { signInWithEmailAndPassword, signOut, onAuthStateChanged, User } from "firebase/auth";
 import { collection, getDocs, query, orderBy } from "firebase/firestore";
 
+interface Lead {
+  id: string;
+  name: string;
+  email?: string;
+  contact?: string;
+  company: string;
+  quality_score: number;
+  status: string;
+}
+
 export default function AdminDashboard() {
   const [user, setUser] = useState<User | null>(null);
   const [loadingAuth, setLoadingAuth] = useState(true);
@@ -16,7 +26,7 @@ export default function AdminDashboard() {
   const [isLoggingIn, setIsLoggingIn] = useState(false);
 
   // Leads Data State
-  const [leads, setLeads] = useState<any[]>([]);
+  const [leads, setLeads] = useState<Lead[]>([]);
   const [loadingLeads, setLoadingLeads] = useState(false);
 
   // 1. Listen for Authentication State Changes
@@ -42,7 +52,7 @@ export default function AdminDashboard() {
       const leadsData = querySnapshot.docs.map(doc => ({
         id: doc.id,
         ...doc.data()
-      }));
+      } as Lead));
       setLeads(leadsData);
     } catch (error) {
       console.error("Error fetching leads:", error);
@@ -59,7 +69,7 @@ export default function AdminDashboard() {
     try {
       await signInWithEmailAndPassword(auth, email, password);
       // fetchLeads will be triggered by the auth state listener
-    } catch (error: any) {
+    } catch {
       setAuthError("Invalid email or password. Access denied.");
     } finally {
       setIsLoggingIn(false);

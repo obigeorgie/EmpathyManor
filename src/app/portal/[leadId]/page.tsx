@@ -2,6 +2,7 @@
 
 import { useEffect, useState, useCallback } from "react";
 import { useParams } from "next/navigation";
+import Link from "next/link";
 import {
   doc,
   getDoc,
@@ -129,12 +130,12 @@ export default function DealRoom() {
           may have expired. Please contact your relationship manager for an
           updated link.
         </p>
-        <a
+        <Link
           href="/"
           className="mt-2 rounded-lg bg-zinc-800 px-5 py-2 text-sm font-medium text-zinc-300 transition-colors hover:bg-zinc-700"
         >
           Back to Home
-        </a>
+        </Link>
       </div>
     );
   }
