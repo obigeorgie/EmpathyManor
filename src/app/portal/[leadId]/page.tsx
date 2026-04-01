@@ -295,6 +295,9 @@ export default function DealRoom() {
             </div>
           </div>
         </section>
+
+        {/* ── Arbitrage ROI Calculator ── */}
+        <ArbitrageROICalculator />
       </main>
 
       {/* ── Toast ── */}
@@ -356,6 +359,173 @@ export default function DealRoom() {
             <p className="text-xs text-zinc-400">{toastMessage.body}</p>
           </div>
         </div>
+      </div>
+    </div>
+  );
+}
+
+/* ── Arbitrage ROI Calculator ── */
+function ArbitrageROICalculator() {
+  const [propertyValue, setPropertyValue] = useState(150_000_000);
+  const [rentalYield, setRentalYield] = useState(10_000_000);
+  const [exchangeRate, setExchangeRate] = useState(1500);
+
+  const acquisitionUSD = propertyValue / exchangeRate;
+  const annualCashFlowUSD = rentalYield / exchangeRate;
+  const cashOnCash = acquisitionUSD > 0 ? (annualCashFlowUSD / acquisitionUSD) * 100 : 0;
+
+  const fmtNGN = (n: number) =>
+    "₦" + n.toLocaleString("en-NG", { maximumFractionDigits: 0 });
+  const fmtUSD = (n: number) =>
+    "$" + n.toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+
+  return (
+    <section
+      id="roi-calculator"
+      className="mt-10 overflow-hidden rounded-3xl border border-zinc-800/60 bg-zinc-900/40 backdrop-blur-md"
+    >
+      {/* Header */}
+      <div className="border-b border-zinc-800/60 px-6 py-5 sm:px-10">
+        <div className="flex items-center gap-3">
+          <span className="flex h-9 w-9 items-center justify-center rounded-xl bg-emerald-500/15 ring-1 ring-emerald-500/25">
+            <svg className="h-5 w-5 text-emerald-400" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 15.75V18m-7.5-6.75V18m15-8.25v6.75a2.25 2.25 0 0 1-2.25 2.25H3a2.25 2.25 0 0 1-2.25-2.25V9.75m22.5 0V6.75A2.25 2.25 0 0 0 21 4.5H3A2.25 2.25 0 0 0 .75 6.75v3m22.5 0H.75" />
+            </svg>
+          </span>
+          <div>
+            <h3 className="text-lg font-bold text-white">Arbitrage ROI Calculator</h3>
+            <p className="text-xs text-zinc-500">Stress-test your returns across exchange rate scenarios</p>
+          </div>
+        </div>
+      </div>
+
+      <div className="p-6 sm:p-10">
+        {/* Sliders */}
+        <div className="space-y-8">
+          {/* Property Value */}
+          <SliderInput
+            id="calc-property-value"
+            label="Estimated Property Value"
+            value={propertyValue}
+            onChange={setPropertyValue}
+            min={50_000_000}
+            max={500_000_000}
+            step={5_000_000}
+            format={fmtNGN}
+          />
+
+          {/* Rental Yield */}
+          <SliderInput
+            id="calc-rental-yield"
+            label="Expected Annual Rental Yield"
+            value={rentalYield}
+            onChange={setRentalYield}
+            min={1_000_000}
+            max={50_000_000}
+            step={500_000}
+            format={fmtNGN}
+          />
+
+          {/* Exchange Rate */}
+          <SliderInput
+            id="calc-exchange-rate"
+            label="NGN to USD Exchange Rate"
+            value={exchangeRate}
+            onChange={setExchangeRate}
+            min={500}
+            max={5000}
+            step={25}
+            format={(v) => `₦${v.toLocaleString()} / $1`}
+          />
+        </div>
+
+        {/* Divider */}
+        <div className="my-8 h-px bg-gradient-to-r from-transparent via-zinc-700/60 to-transparent" />
+
+        {/* Output Cards */}
+        <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
+          <div className="rounded-2xl border border-sky-500/20 bg-zinc-900/60 p-5 backdrop-blur">
+            <p className="text-xs uppercase tracking-wider text-zinc-500">Acquisition Cost</p>
+            <p className="mt-1 text-2xl font-bold text-sky-400">{fmtUSD(acquisitionUSD)}</p>
+            <p className="mt-0.5 text-xs text-zinc-500">Total in USD</p>
+          </div>
+
+          <div className="rounded-2xl border border-violet-500/20 bg-zinc-900/60 p-5 backdrop-blur">
+            <p className="text-xs uppercase tracking-wider text-zinc-500">Annual Cash Flow</p>
+            <p className="mt-1 text-2xl font-bold text-violet-400">{fmtUSD(annualCashFlowUSD)}</p>
+            <p className="mt-0.5 text-xs text-zinc-500">Net rental in USD</p>
+          </div>
+
+          <div className="rounded-2xl border border-emerald-500/20 bg-zinc-900/60 p-5 backdrop-blur relative overflow-hidden">
+            {/* Glow behind ROI number */}
+            <div className="pointer-events-none absolute -right-6 -top-6 h-28 w-28 rounded-full bg-emerald-500/10 blur-2xl" />
+            <p className="text-xs uppercase tracking-wider text-zinc-500">Cash-on-Cash Return</p>
+            <p className="mt-1 text-3xl font-extrabold text-emerald-400">
+              {cashOnCash.toFixed(2)}
+              <span className="text-xl">%</span>
+            </p>
+            <p className="mt-0.5 text-xs text-zinc-500">Annual ROI</p>
+          </div>
+        </div>
+
+        {/* Disclaimer */}
+        <p className="mt-6 text-[11px] leading-relaxed text-zinc-600">
+          Projections are estimates for illustrative purposes only and do not constitute financial advice.
+          Actual returns may vary based on occupancy, maintenance costs, and currency fluctuations.
+        </p>
+      </div>
+    </section>
+  );
+}
+
+/* ── Slider Input ── */
+function SliderInput({
+  id,
+  label,
+  value,
+  onChange,
+  min,
+  max,
+  step,
+  format,
+}: {
+  id: string;
+  label: string;
+  value: number;
+  onChange: (v: number) => void;
+  min: number;
+  max: number;
+  step: number;
+  format: (v: number) => string;
+}) {
+  const pct = ((value - min) / (max - min)) * 100;
+
+  return (
+    <div>
+      <div className="mb-2 flex items-center justify-between">
+        <label htmlFor={id} className="text-sm font-medium text-zinc-300">
+          {label}
+        </label>
+        <span className="rounded-lg border border-zinc-800 bg-zinc-900/80 px-3 py-1 text-sm font-semibold tabular-nums text-white">
+          {format(value)}
+        </span>
+      </div>
+      <input
+        id={id}
+        type="range"
+        min={min}
+        max={max}
+        step={step}
+        value={value}
+        onChange={(e) => onChange(Number(e.target.value))}
+        className="calc-slider w-full cursor-pointer appearance-none rounded-full bg-zinc-800 h-2 outline-none"
+        style={{
+          background: `linear-gradient(to right, #34d399 0%, #34d399 ${pct}%, #3f3f46 ${pct}%, #3f3f46 100%)`,
+        }}
+      />
+      <div className="mt-1 flex justify-between text-[10px] text-zinc-600">
+        <span>{format(min)}</span>
+        <span>{format(max)}</span>
       </div>
     </div>
   );
