@@ -1,12 +1,16 @@
 import Link from "next/link";
+import Logo from "@/components/Logo";
 
 export default function Home() {
   return (
     <div className="min-h-screen bg-slate-950 text-slate-50 font-sans selection:bg-emerald-500/30">
       {/* Navbar skeleton */}
       <nav className="fixed top-0 left-0 right-0 z-50 py-6 px-6 lg:px-12 flex justify-between items-center backdrop-blur-md bg-slate-950/50 border-b border-slate-800/50">
-        <div className="text-xl font-semibold tracking-wide text-transparent bg-clip-text bg-gradient-to-r from-emerald-100 to-emerald-400">
-          EMPATHY MANOR
+        <div className="flex items-center space-x-3">
+          <Logo className="w-8 h-8 text-slate-100" />
+          <div className="text-xl font-semibold tracking-wide text-transparent bg-clip-text bg-gradient-to-r from-emerald-100 to-emerald-400">
+            EMPATHY MANOR
+          </div>
         </div>
         <div className="hidden md:flex space-x-8 text-sm text-slate-300">
           <Link href="#value-prop" className="hover:text-emerald-300 transition-colors">Our Edge</Link>
@@ -149,18 +153,19 @@ export default function Home() {
       {/* Footer */}
       <footer id="contact" className="py-12 px-6 lg:px-12 border-t border-slate-800/80 bg-slate-950 mt-12">
         <div className="max-w-7xl mx-auto flex flex-col md:flex-row justify-between items-center text-sm text-slate-500">
-          <div className="mb-4 md:mb-0">
-            <span className="font-semibold text-slate-300">EMPATHY MANOR</span> &copy; {new Date().getFullYear()}. All rights reserved.
+          <div className="mb-4 md:mb-0 flex items-center space-x-2">
+            <Logo className="w-5 h-5 text-slate-400" />
+            <span><span className="font-semibold text-slate-300">EMPATHY MANOR</span> &copy; {new Date().getFullYear()}. All rights reserved.</span>
           </div>
           <div className="flex space-x-6">
             <a href="mailto:contact@empathymanor.com" className="hover:text-emerald-400 transition-colors">
               contact@empathymanor.com
             </a>
             <span className="opacity-30">|</span>
-            <a href="#" className="hover:text-emerald-400 transition-colors">
+            <a href="#" title="Coming Soon" className="opacity-50 cursor-not-allowed hover:text-emerald-400 transition-colors">
               Terms of Service
             </a>
-            <a href="#" className="hover:text-emerald-400 transition-colors">
+            <a href="#" title="Coming Soon" className="opacity-50 cursor-not-allowed hover:text-emerald-400 transition-colors">
               Privacy Policy
             </a>
           </div>
