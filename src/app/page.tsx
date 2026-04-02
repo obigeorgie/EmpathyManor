@@ -157,11 +157,15 @@ export default function Home() {
             <Logo className="w-5 h-5 text-slate-400" />
             <span><span className="font-semibold text-slate-300">EMPATHY MANOR</span> &copy; {new Date().getFullYear()}. All rights reserved.</span>
           </div>
-          <div className="flex space-x-6">
+          <div className="flex flex-wrap items-center justify-center md:justify-end gap-3 md:gap-6 mt-4 md:mt-0">
             <a href="mailto:contact@empathymanor.com" className="hover:text-emerald-400 transition-colors">
               contact@empathymanor.com
             </a>
-            <span className="opacity-30">|</span>
+            <span className="hidden md:inline opacity-30">|</span>
+            <a href="https://wa.me/YOUR_PHONE_NUMBER?text=Hi,%20I'm%20reviewing%20my%20Empathy%20Manor%20Deal%20Room%20and%20have%20a%20question." target="_blank" rel="noopener noreferrer" className="hover:text-[#25D366] transition-colors">
+              WhatsApp
+            </a>
+            <span className="hidden md:inline opacity-30">|</span>
             <Link href="/terms" className="hover:text-emerald-400 transition-colors">
               Terms of Service
             </Link>
