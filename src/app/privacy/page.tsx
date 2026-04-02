@@ -57,7 +57,7 @@ export default function PrivacyPolicy() {
               contact@empathymanor.com
             </a>
             <span className="hidden md:inline opacity-30">|</span>
-            <a href="https://wa.me/YOUR_PHONE_NUMBER?text=Hi,%20I'm%20reviewing%20my%20Empathy%20Manor%20Deal%20Room%20and%20have%20a%20question." target="_blank" rel="noopener noreferrer" className="hover:text-[#25D366] transition-colors">
+            <a href="https://wa.me/18329673513?text=Hi,%20I'm%20reviewing%20my%20Empathy%20Manor%20Deal%20Room%20and%20have%20a%20question." target="_blank" rel="noopener noreferrer" className="hover:text-[#25D366] transition-colors">
               WhatsApp
             </a>
             <span className="hidden md:inline opacity-30">|</span>

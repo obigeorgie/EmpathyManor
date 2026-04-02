@@ -290,7 +290,7 @@ export default function DealRoom() {
                       : "Request Escrow Details"}
                 </button>
                 <a 
-                  href="https://wa.me/YOUR_PHONE_NUMBER?text=Hi,%20I'm%20reviewing%20my%20Empathy%20Manor%20Deal%20Room%20and%20have%20a%20question."
+                  href="https://wa.me/18329673513?text=Hi,%20I'm%20reviewing%20my%20Empathy%20Manor%20Deal%20Room%20and%20have%20a%20question."
                   target="_blank"
                   rel="noopener noreferrer"
                   className="group inline-flex items-center gap-2 rounded-xl border border-zinc-800 bg-zinc-900/50 px-7 py-3.5 text-sm font-semibold text-zinc-300 transition-all hover:border-[#25D366]/50 hover:text-[#25D366] hover:bg-[#25D366]/5 active:scale-[0.98]"
