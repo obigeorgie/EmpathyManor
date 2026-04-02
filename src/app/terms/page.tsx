@@ -14,7 +14,7 @@ export default function TermsOfService() {
         <div className="hidden md:flex space-x-8 text-sm text-neutral-300">
           <Link href="/#value-prop" className="hover:text-emerald-300 transition-colors">Our Edge</Link>
           <Link href="/#mandate" className="hover:text-emerald-300 transition-colors">Current Mandates</Link>
-          <Link href="/#contact" className="hover:text-emerald-300 transition-colors">Contact</Link>
+          <a href="mailto:contact@empathymanor.com" className="hover:text-emerald-300 transition-colors">Contact</a>
         </div>
       </nav>
 

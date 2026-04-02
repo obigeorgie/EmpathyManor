@@ -6,16 +6,16 @@ export default function Home() {
     <div className="min-h-screen bg-slate-950 text-slate-50 font-sans selection:bg-emerald-500/30">
       {/* Navbar skeleton */}
       <nav className="fixed top-0 left-0 right-0 z-50 py-6 px-6 lg:px-12 flex justify-between items-center backdrop-blur-md bg-slate-950/50 border-b border-slate-800/50">
-        <div className="flex items-center space-x-3">
+        <Link href="/" className="flex items-center space-x-3">
           <Logo className="w-8 h-8 text-slate-100" />
           <div className="text-xl font-semibold tracking-wide text-transparent bg-clip-text bg-gradient-to-r from-emerald-100 to-emerald-400">
             EMPATHY MANOR
           </div>
-        </div>
+        </Link>
         <div className="hidden md:flex space-x-8 text-sm text-slate-300">
           <Link href="#value-prop" className="hover:text-emerald-300 transition-colors">Our Edge</Link>
           <Link href="#mandate" className="hover:text-emerald-300 transition-colors">Current Mandates</Link>
-          <Link href="#contact" className="hover:text-emerald-300 transition-colors">Contact</Link>
+          <a href="mailto:contact@empathymanor.com" className="hover:text-emerald-300 transition-colors">Contact</a>
         </div>
       </nav>
 
