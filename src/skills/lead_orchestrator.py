@@ -39,9 +39,9 @@ def run_lead_scout(linkedin_url: str) -> LeadState:
     """
     logger.info(f"LeadScout: Starting extraction for {linkedin_url}")
     
-    apify_token = os.environ.get("APIFY_TOKEN")
+    apify_token = os.environ.get("APIFY_API_TOKEN")
     if not apify_token:
-        raise ValueError("APIFY_TOKEN is missing in environment variables.")
+        raise ValueError("APIFY_API_TOKEN is missing in environment variables.")
         
     client = ApifyClient(apify_token)
     
