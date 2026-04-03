@@ -4,6 +4,9 @@ import logging
 from dataclasses import dataclass
 from typing import Optional, Dict, Any
 
+from dotenv import load_dotenv
+load_dotenv('.env.local')
+
 from google import generativeai as genai
 from apify_client import ApifyClient
 import firebase_admin
