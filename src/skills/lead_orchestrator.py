@@ -1,14 +1,14 @@
 import os
 import json
 import logging
-from dataclasses import dataclass
-from typing import Optional, Dict, Any
+import requests
+from dataclasses import dataclass, asdict
+from typing import Optional, Dict, Any, List
 
 from dotenv import load_dotenv
 load_dotenv('.env.local')
 
 from google import generativeai as genai
-from apify_client import ApifyClient
 import firebase_admin
 from firebase_admin import credentials, firestore
 
@@ -20,65 +20,76 @@ logging.basicConfig(
 logger = logging.getLogger("LeadOrchestrator")
 
 
-# === TASK 1: Define the State Object ===
+# === TASK 1: Create the Universal State Object ===
+
+@dataclass
+class NormalizedLead:
+    name: str
+    job_title: str
+    location: str
+    bio_context: str
+    source: str # e.g., 'NPI', 'LinkedIn', 'Google'
+
 @dataclass
 class LeadState:
-    """Standardized JSON-serializable state representing an extracted lead."""
-    query_or_url: str
-    raw_data: Optional[Dict[str, Any]] = None
+    """Standardized JSON-serializable wrapper passed down the agent pipeline."""
+    normalized_data: NormalizedLead
     quality_score: Optional[int] = None
     reasoning: Optional[str] = None
     firebase_id: Optional[str] = None
 
 
-# === TASK 2: Build the Three Agent Functions ===
+# === TASK 2: Build the NPI Scout (The Adapter) ===
 
-def run_lead_scout(query_or_url: str) -> LeadState:
+def run_npi_scout(city: str, state: str, taxonomy_desc: str) -> List[NormalizedLead]:
     """
-    Triggers Apify, extracts profile data, and returns state with `raw_data`.
+    Makes a GET request to the public NPI API and returns a list of NormalizedLead objects.
     """
-    logger.info(f"LeadScout: Starting extraction for {query_or_url}")
+    logger.info(f"NPI Scout: Searching {taxonomy_desc} in {city}, {state}...")
     
-    apify_token = os.environ.get("APIFY_API_TOKEN")
-    if not apify_token:
-        raise ValueError("APIFY_API_TOKEN is missing in environment variables.")
+    url = f"https://npiregistry.cms.hhs.gov/api/?version=2.1&city={city}&state={state}&taxonomy_description={taxonomy_desc}&limit=50"
+    
+    response = requests.get(url)
+    response.raise_for_status()
+    data = response.json()
+    
+    normalized_leads = []
+    results = data.get("results", [])
+    
+    for row in results:
+        basic = row.get("basic", {})
+        first_name = basic.get("first_name", "")
+        last_name = basic.get("last_name", "")
         
-    client = ApifyClient(apify_token)
-    
-    # Defaulting to an example actor, substitute with the correct one if needed
-    actor_id = os.environ.get("APIFY_ACTOR_ID", "jloire/linkedin-profile-scraper") 
-    run_input = {
-        "urls": [query_or_url],
-        "searchStringsArray": [query_or_url]
-    }
-    
-    logger.info(f"LeadScout: Calling Apify Actor {actor_id}...")
-    run = client.actor(actor_id).call(run_input=run_input)
-    
-    dataset_client = client.dataset(run["defaultDatasetId"])
-    dataset_items = dataset_client.list_items().items
-    
-    if not dataset_items:
-        raise ValueError("Apify scan returned empty results for the provided query/URL.")
+        taxonomies = row.get("taxonomies", [])
+        job_t = taxonomies[0].get("desc", "Unknown") if len(taxonomies) > 0 else "Unknown"
         
-    raw_data = dataset_items[0]
-    logger.info("LeadScout: Profiling successful. Raw data extracted.")
-    
-    return LeadState(
-        query_or_url=query_or_url,
-        raw_data=raw_data
-    )
+        addresses = row.get("addresses", [])
+        address_c = addresses[0].get("city", "Unknown") if len(addresses) > 0 else "Unknown"
+        address_s = addresses[0].get("state", "Unknown") if len(addresses) > 0 else "Unknown"
+        
+        new_lead = NormalizedLead(
+            name=f"{first_name} {last_name}".strip(),
+            job_title=job_t,
+            location=f"{address_c}, {address_s}",
+            bio_context="Verified US Medical License via NPI Registry",
+            source="NPI"
+        )
+        normalized_leads.append(new_lead)
+        
+    logger.info(f"NPI Scout: Successfully parsed {len(normalized_leads)} standardized records.")
+    return normalized_leads
 
+
+# === DOWNSTREAM AGENTS ===
 
 def run_deal_analyst(state: LeadState) -> LeadState:
     """
-    Calls Gemini API to evaluate unstructured `raw_data` against Magodo arbitrage criteria.
+    Calls Gemini API to evaluate unstructured `normalized_data` against Magodo arbitrage criteria.
     Updates the state with `quality_score` and `reasoning`.
     """
-    logger.info("DealAnalyst: Commencing deal arbitrage evaluation.")
-    
-    if not state.raw_data:
-        raise ValueError("Analyst requires state to have populated 'raw_data'")
+    if not state.normalized_data:
+        raise ValueError("Analyst requires state to have populated 'normalized_data'")
         
     gemini_api_key = os.environ.get("GEMINI_API_KEY")
     if not gemini_api_key:
@@ -86,7 +97,6 @@ def run_deal_analyst(state: LeadState) -> LeadState:
         
     genai.configure(api_key=gemini_api_key)
 
-    # Using the current leading edge model contextually
     model = genai.GenerativeModel('gemini-1.5-pro')
     
     prompt = f"""
@@ -104,13 +114,12 @@ def run_deal_analyst(state: LeadState) -> LeadState:
 
     1/10: Low-income profession or invalid data.
     
-    Raw Profile Data:
-    {json.dumps(state.raw_data, indent=2)}
+    Normalized Lead Data:
+    {json.dumps(asdict(state.normalized_data), indent=2)}
 
     Return ONLY a JSON object: {{"quality_score": <number>, "reasoning": "<1 sentence explanation>"}}.
     """
     
-    logger.info("DealAnalyst: Sending prompt to Gemini...")
     response = model.generate_content(
         prompt,
         generation_config=genai.GenerationConfig(
@@ -122,7 +131,7 @@ def run_deal_analyst(state: LeadState) -> LeadState:
         analysis = json.loads(response.text)
         state.quality_score = int(analysis.get("quality_score", 0))
         state.reasoning = analysis.get("reasoning", "No valid reasoning parsed.")
-        logger.info(f"DealAnalyst: Scoring complete. Quality Score: {state.quality_score}/10")
+        logger.info(f"DealAnalyst: Scored {state.normalized_data.name} -> {state.quality_score}/10")
     except (json.JSONDecodeError, ValueError) as parse_err:
         raise RuntimeError(f"Failed to parse or interpret Gemini response: {str(parse_err)} | Raw Text: {response.text}")
         
@@ -134,19 +143,9 @@ def run_vault_manager(state: LeadState) -> LeadState:
     Takes the scored state. If quality_score >= 7, logs in to Firebase and pushes the lead
     to the 'empathy_leads' collection, then maps back the 'firebase_id'.
     """
-    logger.info(f"VaultManager: Validating eligibility. Current Score: {state.quality_score}")
-    
-    if state.quality_score is None:
-        raise ValueError("VaultManager cannot process an un-scored LeadState.")
-        
-    if state.quality_score < 7:
-        logger.info(f"VaultManager: Lead rejected. Score {state.quality_score} < 7. Halting persistence.")
-        return state
-        
-    logger.info("VaultManager: Lead accepted. Establishing secure channel to Firebase...")
+    logger.info(f"VaultManager: Lead {state.normalized_data.name} meets threshold. Persisting to database...")
     
     if not firebase_admin._apps:
-        # Initialize Firebase securely using default configuration patterns
         creds_path = os.environ.get("GOOGLE_APPLICATION_CREDENTIALS")
         if creds_path:
             cred = credentials.Certificate(creds_path)
@@ -156,10 +155,9 @@ def run_vault_manager(state: LeadState) -> LeadState:
             
     db = firestore.client()
     
-    # Constructing the payload for persistence
+    # Constructing the payload for persistence using the clean Normalized schema
     document_data = {
-        "queryOrUrl": state.query_or_url,
-        "rawData": state.raw_data,
+        "normalizedData": asdict(state.normalized_data),
         "qualityScore": state.quality_score,
         "reasoning": state.reasoning,
         "status": "ingested",
@@ -171,53 +169,56 @@ def run_vault_manager(state: LeadState) -> LeadState:
         _, doc_ref = collection_ref.add(document_data)
         
         state.firebase_id = doc_ref.id
-        logger.info(f"VaultManager: Lead securely pushed to Empathy Vault. Doc ID: {state.firebase_id}")
+        logger.info(f"VaultManager: Successfully persisted {state.normalized_data.name}. Doc ID: {state.firebase_id}")
     except Exception as e:
         raise RuntimeError(f"Firestore Insertion Error: {str(e)}")
         
     return state
 
 
-# === TASK 3: Build the Orchestrator (The Main Loop) ===
+# === TASK 3: Update the Orchestrator Main Loop ===
 
-def process_lead(query_or_url: str) -> Optional[LeadState]:
+def process_lead():
     """
-    Process an individual lead URL or query through the multi-agent orchestration pipeline.
-    Rigorous failure bounds gracefully halt downstream processing upon any agent's failure.
+    Orchestrates the ETL batch processing logic retrieving bulk items from our adapter
+    and mapping them consecutively via downstream analysis tools into our data vault.
     """
-    logger.info(f"--- ORCHESTRATOR: Initiating sequence for {query_or_url} ---")
-    state = None
+    logger.info("--- ORCHESTRATOR: Initiating Bulk Deal Analysis Pipeline ---")
     
-    # Step 1: Engage Lead Scout (Apify Extraction)
+    # Step 1: Engage Lead Scout (Adapter Selection)
     try:
-        state = run_lead_scout(query_or_url)
+        # Note: We are hardcoding this specific execution block for the NPI logic test.
+        leads = run_npi_scout(city="Tampa", state="FL", taxonomy_desc="Surgery")
     except Exception as e:
         logger.error(f"🚨 Orchestrator HALTED [LeadScout]: Failed to extract data. Details: {str(e)}")
-        # Halting execution; ensuring we don't blindly pass empty state forward.
-        return None
-
-    # Step 2: Engage Deal Analyst (Gemini Analysis)
-    try:
-        state = run_deal_analyst(state)
-    except Exception as e:
-        logger.error(f"🚨 Orchestrator HALTED [DealAnalyst]: Failed to evaluate deal criteria. Details: {str(e)}")
-        return state 
-
-    # Step 3: Engage Vault Manager (Firestore Persistence)
-    try:
-        state = run_vault_manager(state)
-    except Exception as e:
-        logger.error(f"🚨 Orchestrator HALTED [VaultManager]: Failed to commit lead to vault. Details: {str(e)}")
-        return state
+        return
         
-    logger.info(f"✅ ORCHESTRATOR: Execution successfully finalized! Firebase DB ID: {state.firebase_id}")
-    return state
+    logger.info(f"Orchestrator: Queued {len(leads)} candidates for Deal Analysis.")
+
+    # Loop through the parsed items 
+    for npi_lead in leads:
+        logger.info(f"> Processing Candidate: {npi_lead.name}")
+        state = LeadState(normalized_data=npi_lead)
+        
+        # Step 2: Engage Deal Analyst (Gemini Analysis)
+        try:
+            state = run_deal_analyst(state)
+        except Exception as e:
+            logger.error(f"  └── 🚨 Analyst Exception for {npi_lead.name}: {str(e)}")
+            continue 
+
+        # Step 3: Engage Vault Manager (Firestore Persistence)
+        if state.quality_score is not None and state.quality_score >= 7:
+            try:
+                state = run_vault_manager(state)
+            except Exception as e:
+                logger.error(f"  └── 🚨 VaultManager Exception for {npi_lead.name}: {str(e)}")
+                continue
+        else:
+            logger.info(f"  └── Orchestrator: Candidate {npi_lead.name} bypassed. Score: {state.quality_score}")
+            
+    logger.info(f"✅ ORCHESTRATOR: Batch job successfully concluded.")
 
 if __name__ == "__main__":
-    import sys
-    # Small test loop for manual execution
-    if len(sys.argv) > 1:
-        target_input = sys.argv[1]
-        process_lead(target_input)
-    else:
-        logger.warning("No input provided. Usage: python lead_orchestrator.py <query_or_url>")
+    # Test execution
+    process_lead()
