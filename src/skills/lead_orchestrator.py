@@ -90,18 +90,24 @@ def run_deal_analyst(state: LeadState) -> LeadState:
     model = genai.GenerativeModel('gemini-1.5-pro')
     
     prompt = f"""
-    You are an expert Real Estate Deal Analyst specializing in Magodo arbitrage criteria.
-    Evaluate the following LinkedIn profile data to determine if this individual is a qualified lead 
-    (focusing on high net worth indicators, interest in real estate, or investment capital).
+    You are an elite Real Estate Analyst for Empathy Manor. Your job is to filter scraped lead data to find high-net-worth Nigerian diaspora professionals (e.g., physicians, tech founders) based in the US or UK.
+
+    We are pitching a high-ticket real estate arbitrage opportunity in Magodo GRA Phase 2 (Lagos).
+
+    Evaluate the provided JSON data. Assign a quality_score from 1 to 10 based on these criteria:
+
+    10/10: Explicitly Nigerian name/identity AND high-income profession (Surgeon, Specialist, Founder, Executive).
+
+    7/10: Likely African diaspora AND high-income profession OR Explicitly Nigerian but medium-income profession.
+
+    3/10: High-income profession but zero obvious ties to the diaspora (Do not pitch Nigerian real estate blindly).
+
+    1/10: Low-income profession or invalid data.
     
     Raw Profile Data:
     {json.dumps(state.raw_data, indent=2)}
-    
-    Respond STRICTLY in JSON format with exactly the following schema:
-    {{
-        "quality_score": <int between 1-10, where 10 is the strongest fit>,
-        "reasoning": "<string explaining why they match the Magodo arbitrage criteria>"
-    }}
+
+    Return ONLY a JSON object: {{"quality_score": <number>, "reasoning": "<1 sentence explanation>"}}.
     """
     
     logger.info("DealAnalyst: Sending prompt to Gemini...")
