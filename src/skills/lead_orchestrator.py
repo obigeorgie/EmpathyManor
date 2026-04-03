@@ -24,7 +24,7 @@ logger = logging.getLogger("LeadOrchestrator")
 @dataclass
 class LeadState:
     """Standardized JSON-serializable state representing an extracted lead."""
-    linkedin_url: str
+    query_or_url: str
     raw_data: Optional[Dict[str, Any]] = None
     quality_score: Optional[int] = None
     reasoning: Optional[str] = None
@@ -33,11 +33,11 @@ class LeadState:
 
 # === TASK 2: Build the Three Agent Functions ===
 
-def run_lead_scout(linkedin_url: str) -> LeadState:
+def run_lead_scout(query_or_url: str) -> LeadState:
     """
     Triggers Apify, extracts profile data, and returns state with `raw_data`.
     """
-    logger.info(f"LeadScout: Starting extraction for {linkedin_url}")
+    logger.info(f"LeadScout: Starting extraction for {query_or_url}")
     
     apify_token = os.environ.get("APIFY_API_TOKEN")
     if not apify_token:
@@ -48,7 +48,8 @@ def run_lead_scout(linkedin_url: str) -> LeadState:
     # Defaulting to an example actor, substitute with the correct one if needed
     actor_id = os.environ.get("APIFY_ACTOR_ID", "jloire/linkedin-profile-scraper") 
     run_input = {
-        "urls": [linkedin_url]
+        "urls": [query_or_url],
+        "searchStringsArray": [query_or_url]
     }
     
     logger.info(f"LeadScout: Calling Apify Actor {actor_id}...")
@@ -58,13 +59,13 @@ def run_lead_scout(linkedin_url: str) -> LeadState:
     dataset_items = dataset_client.list_items().items
     
     if not dataset_items:
-        raise ValueError("Apify scan returned empty results for the provided LinkedIn URL.")
+        raise ValueError("Apify scan returned empty results for the provided query/URL.")
         
     raw_data = dataset_items[0]
     logger.info("LeadScout: Profiling successful. Raw data extracted.")
     
     return LeadState(
-        linkedin_url=linkedin_url,
+        query_or_url=query_or_url,
         raw_data=raw_data
     )
 
@@ -151,7 +152,7 @@ def run_vault_manager(state: LeadState) -> LeadState:
     
     # Constructing the payload for persistence
     document_data = {
-        "linkedinUrl": state.linkedin_url,
+        "queryOrUrl": state.query_or_url,
         "rawData": state.raw_data,
         "qualityScore": state.quality_score,
         "reasoning": state.reasoning,
@@ -173,17 +174,17 @@ def run_vault_manager(state: LeadState) -> LeadState:
 
 # === TASK 3: Build the Orchestrator (The Main Loop) ===
 
-def process_lead(linkedin_url: str) -> Optional[LeadState]:
+def process_lead(query_or_url: str) -> Optional[LeadState]:
     """
-    Process an individual lead URL through the multi-agent orchestration pipeline.
+    Process an individual lead URL or query through the multi-agent orchestration pipeline.
     Rigorous failure bounds gracefully halt downstream processing upon any agent's failure.
     """
-    logger.info(f"--- ORCHESTRATOR: Initiating sequence for {linkedin_url} ---")
+    logger.info(f"--- ORCHESTRATOR: Initiating sequence for {query_or_url} ---")
     state = None
     
     # Step 1: Engage Lead Scout (Apify Extraction)
     try:
-        state = run_lead_scout(linkedin_url)
+        state = run_lead_scout(query_or_url)
     except Exception as e:
         logger.error(f"🚨 Orchestrator HALTED [LeadScout]: Failed to extract data. Details: {str(e)}")
         # Halting execution; ensuring we don't blindly pass empty state forward.
@@ -210,7 +211,7 @@ if __name__ == "__main__":
     import sys
     # Small test loop for manual execution
     if len(sys.argv) > 1:
-        target_url = sys.argv[1]
-        process_lead(target_url)
+        target_input = sys.argv[1]
+        process_lead(target_input)
     else:
-        logger.warning("No LinkedIn URL provided. Usage: python lead_orchestrator.py <linkedin_url>")
+        logger.warning("No input provided. Usage: python lead_orchestrator.py <query_or_url>")
