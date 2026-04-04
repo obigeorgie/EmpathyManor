@@ -1,4 +1,5 @@
 import Link from "next/link";
+import Image from "next/image";
 import Logo from "@/components/Logo";
 
 export default function Home() {
@@ -154,8 +155,13 @@ export default function Home() {
       <section id="about" className="py-24 px-6 lg:px-12 bg-slate-900/50 border-t border-slate-800/50">
         <div className="max-w-4xl mx-auto flex flex-col md:flex-row items-center md:items-start gap-12">
           <div className="shrink-0 flex flex-col items-center">
-            <div className="w-32 h-32 rounded-full bg-zinc-800 border-[3px] border-slate-800 overflow-hidden shadow-[0_0_30px_-5px_var(--color-emerald-500)] mb-4">
-              {/* Headshot Placeholder */}
+            <div className="relative w-32 h-32 rounded-full overflow-hidden border-2 border-emerald-500/30 shadow-[0_0_30px_-5px_var(--color-emerald-500)] mb-4">
+              <Image 
+                src="/nnamdi-profile.jpg" 
+                alt="Nnamdi - Managing Partner" 
+                fill 
+                className="object-cover"
+              />
             </div>
             <h3 className="text-2xl font-medium tracking-wide text-transparent bg-clip-text bg-gradient-to-r from-emerald-100 to-emerald-400">Nnamdi</h3>
             <p className="text-xs font-semibold text-slate-500 uppercase tracking-[0.2em] mt-1">Managing Partner</p>
