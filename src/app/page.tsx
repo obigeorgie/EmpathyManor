@@ -150,8 +150,75 @@ export default function Home() {
         </div>
       </section>
 
+      {/* About the Managing Partner Section */}
+      <section id="about" className="py-24 px-6 lg:px-12 bg-slate-900/50 border-t border-slate-800/50">
+        <div className="max-w-4xl mx-auto flex flex-col md:flex-row items-center md:items-start gap-12">
+          <div className="shrink-0 flex flex-col items-center">
+            <div className="w-32 h-32 rounded-full bg-zinc-800 border-[3px] border-slate-800 overflow-hidden shadow-[0_0_30px_-5px_var(--color-emerald-500)] mb-4">
+              {/* Headshot Placeholder */}
+            </div>
+            <h3 className="text-2xl font-medium tracking-wide text-transparent bg-clip-text bg-gradient-to-r from-emerald-100 to-emerald-400">Nnamdi</h3>
+            <p className="text-xs font-semibold text-slate-500 uppercase tracking-[0.2em] mt-1">Managing Partner</p>
+          </div>
+          <div className="flex-1 space-y-6 text-center md:text-left">
+            <div className="flex flex-col items-center md:items-start">
+              <h2 className="text-3xl md:text-4xl font-light tracking-tight text-white mb-4">About the Managing Partner</h2>
+              <div className="h-1 w-12 bg-emerald-500 rounded-full"></div>
+            </div>
+            <p className="text-lg text-slate-300 leading-relaxed font-light">
+              Nnamdi is a US-based clinical healthcare professional operating out of Florida. Empathy Manor was built out of a personal necessity for a secure, mathematically sound, and frictionless pipeline for diaspora professionals to execute real estate arbitrage in Lagos without the traditional operational headaches.
+            </p>
+          </div>
+        </div>
+      </section>
+
+      {/* Strategic FAQ Section */}
+      <section id="faq" className="py-24 px-6 lg:px-12 relative overflow-hidden bg-slate-950">
+        {/* Subtle background glow */}
+        <div className="absolute -top-40 -right-40 w-96 h-96 bg-emerald-900/10 blur-[100px] rounded-full pointer-events-none"></div>
+        <div className="max-w-4xl mx-auto relative z-10">
+          <div className="text-center mb-16">
+            <h2 className="text-3xl md:text-4xl font-light tracking-tight mb-4 text-white">Strategic FAQ</h2>
+            <div className="h-1 w-12 bg-emerald-500 mx-auto rounded-full"></div>
+          </div>
+          
+          <div className="space-y-6">
+            {/* FAQ 1 */}
+            <div className="p-8 rounded-2xl bg-slate-900/40 border border-slate-800/80 backdrop-blur-sm hover:bg-slate-900/70 hover:border-emerald-500/30 transition-all duration-300 group">
+              <h3 className="text-xl font-medium text-emerald-50 mb-4 flex items-start gap-4">
+                <span className="text-emerald-500 font-light group-hover:text-emerald-400 transition-colors">01.</span>
+                How is the NGN to USD arbitrage executed?
+              </h3>
+              <p className="text-slate-400 leading-relaxed pl-10 md:pl-11">
+                We leverage the significant advantage of earning in dollars while acquiring institutional-grade assets in a depreciated naira market. This dislocation allows diaspora capital to command disproportionate purchasing power, locking in high-yield returns that are typically inaccessible to local participants.
+              </p>
+            </div>
+            {/* FAQ 2 */}
+            <div className="p-8 rounded-2xl bg-slate-900/40 border border-slate-800/80 backdrop-blur-sm hover:bg-slate-900/70 hover:border-emerald-500/30 transition-all duration-300 group">
+              <h3 className="text-xl font-medium text-emerald-50 mb-4 flex items-start gap-4">
+                <span className="text-emerald-500 font-light group-hover:text-emerald-400 transition-colors">02.</span>
+                How do you ensure title security and legal compliance in Magodo GRA Phase 2?
+              </h3>
+              <p className="text-slate-400 leading-relaxed pl-10 md:pl-11">
+                We systematically eliminate counterparty risk through strict physical verification and exclusive legal partnerships. Every asset undergoes rigorous institutional-grade due diligence, ensuring clean title and total legal compliance before any capital is committed.
+              </p>
+            </div>
+            {/* FAQ 3 */}
+            <div className="p-8 rounded-2xl bg-slate-900/40 border border-slate-800/80 backdrop-blur-sm hover:bg-slate-900/70 hover:border-emerald-500/30 transition-all duration-300 group">
+              <h3 className="text-xl font-medium text-emerald-50 mb-4 flex items-start gap-4">
+                <span className="text-emerald-500 font-light group-hover:text-emerald-400 transition-colors">03.</span>
+                Do I need to travel to Nigeria to close a deal?
+              </h3>
+              <p className="text-slate-400 leading-relaxed pl-10 md:pl-11">
+                No. The platform is designed specifically as a turnkey, remote-first pipeline for busy diaspora professionals. We handle the operational intricacies on the ground, allowing you to execute sophisticated asset acquisitions entirely from your current location without the traditional travel friction.
+              </p>
+            </div>
+          </div>
+        </div>
+      </section>
+
       {/* Footer */}
-      <footer id="contact" className="py-12 px-6 lg:px-12 border-t border-slate-800/80 bg-slate-950 mt-12">
+      <footer id="contact" className="py-12 px-6 lg:px-12 border-t border-slate-800/80 bg-slate-950">
         <div className="max-w-7xl mx-auto flex flex-col md:flex-row justify-between items-center text-sm text-slate-500">
           <div className="mb-4 md:mb-0 flex items-center space-x-2">
             <Logo className="w-5 h-5 text-slate-400" />
