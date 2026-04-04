@@ -158,12 +158,12 @@ export default function Home() {
             <div className="relative w-32 h-32 rounded-full overflow-hidden border-2 border-emerald-500/30 shadow-[0_0_30px_-5px_var(--color-emerald-500)] mb-4">
               <Image 
                 src="/nnamdi-profile.jpg" 
-                alt="Nnamdi - Managing Partner" 
+                alt="Nnamdi Okorafor - Managing Partner" 
                 fill 
                 className="object-cover"
               />
             </div>
-            <h3 className="text-2xl font-medium tracking-wide text-transparent bg-clip-text bg-gradient-to-r from-emerald-100 to-emerald-400">Nnamdi</h3>
+            <h3 className="text-2xl font-medium tracking-wide text-transparent bg-clip-text bg-gradient-to-r from-emerald-100 to-emerald-400">Nnamdi Okorafor</h3>
             <p className="text-xs font-semibold text-slate-500 uppercase tracking-[0.2em] mt-1">Managing Partner</p>
           </div>
           <div className="flex-1 space-y-6 text-center md:text-left">
@@ -172,7 +172,7 @@ export default function Home() {
               <div className="h-1 w-12 bg-emerald-500 rounded-full"></div>
             </div>
             <p className="text-lg text-slate-300 leading-relaxed font-light">
-              Nnamdi is a US-based clinical healthcare professional operating out of Florida. Empathy Manor was built out of a personal necessity for a secure, mathematically sound, and frictionless pipeline for diaspora professionals to execute real estate arbitrage in Lagos without the traditional operational headaches.
+              Nnamdi Okorafor is a US-based clinical healthcare professional operating out of Florida. Empathy Manor was built out of a personal necessity for a secure, mathematically sound, and frictionless pipeline for diaspora professionals to execute real estate arbitrage in Lagos without the traditional operational headaches.
             </p>
           </div>
         </div>
