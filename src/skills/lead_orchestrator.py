@@ -118,7 +118,7 @@ def run_deal_analyst(state: LeadState) -> LeadState:
     Return ONLY a JSON object: {{"quality_score": <number>, "reasoning": "<1 sentence explanation>"}}.
     """
     
-    response = client.models.generate_content(model='gemini--pro', contents=prompt)
+    response = client.models.generate_content(model='gemini-3.1-pro', contents=prompt)
     
     try:
         raw_text = response.text.strip()
