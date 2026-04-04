@@ -1,44 +1,25 @@
 'use client';
 
-import { use, useState } from 'react';
-
-interface PropertyData {
-  id: string;
-  name: string;
-  priceNGN: number;
-}
+import { useState, useEffect, use } from 'react';
 
 export default function PortalPage({ params }: { params: Promise<{ id: string }> }) {
   const resolvedParams = use(params);
   const propertyId = resolvedParams.id;
 
-  // Hardcoded property state
-  const [property] = useState<PropertyData>({
-    id: propertyId,
-    name: 'Magodo GRA Phase 2',
-    priceNGN: 150000000,
-  });
+  // Task 2: Base Asset Data
+  const propertyName = "4-Bedroom Semi-Detached Duplex, Magodo GRA Phase 2";
+  const askingPriceNGN = 150000000;
 
+  // Task 2: State Variables for User Inputs
   const [exchangeRate, setExchangeRate] = useState<number>(1378);
-  const [projectedRentUSD, setProjectedRentUSD] = useState<number>(12000);
-  
-  const [isReserving, setIsReserving] = useState(false);
-  const [showToast, setShowToast] = useState(false);
+  const [annualRent, setAnnualRent] = useState<number>(12000);
+  const [renovationCosts, setRenovationCosts] = useState<number>(10000);
 
-  // Core Financial Modeling Calculations
-  const acquisitionCostUSD = property.priceNGN / exchangeRate;
-  const cashOnCashROI = (projectedRentUSD / acquisitionCostUSD) * 100;
+  // Task 2: Derived Variables for Math
+  const usdAcquisitionCost = (askingPriceNGN / exchangeRate) + renovationCosts;
+  const cashOnCashROI = usdAcquisitionCost > 0 ? (annualRent / usdAcquisitionCost) * 100 : 0;
 
-  const handleReserve = async () => {
-    setIsReserving(true);
-    // Simulate an API call to reserve the asset and trigger escrow
-    await new Promise((resolve) => setTimeout(resolve, 1500));
-    setIsReserving(false);
-    setShowToast(true);
-    // Auto-hide toast after 4 seconds
-    setTimeout(() => setShowToast(false), 4000);
-  };
-
+  // Helper for formatting currencies
   const formatCurrency = (value: number, currency: string) => {
     return new Intl.NumberFormat('en-US', {
       style: 'currency',
@@ -47,189 +28,150 @@ export default function PortalPage({ params }: { params: Promise<{ id: string }>
     }).format(value);
   };
 
+  const handleReserve = () => {
+    alert('Reservation request sent to Managing Partner.');
+  };
+
+  // Task 1: Premium Dark-Mode Aesthetic with Glassmorphism
   return (
-    <div className="min-h-screen bg-slate-950 text-slate-100 p-6 md:p-12 font-sans selection:bg-emerald-500/30">
-      <div className="max-w-4xl mx-auto space-y-8">
+    <div className="min-h-screen bg-slate-950 text-slate-100 p-6 md:p-12 font-sans">
+      <div className="max-w-5xl mx-auto space-y-10">
         
-        {/* Deal Header Section */}
-        <header className="border-b border-slate-800 pb-6 mb-8">
-          <h1 className="text-4xl md:text-5xl font-extrabold tracking-tight text-white mb-2">
-            Deal Room
+        {/* Task 3: Header with Placeholder Image */}
+        <header className="space-y-6">
+          <h1 className="text-3xl md:text-5xl font-bold tracking-tight text-white mb-2">
+            {propertyName}
           </h1>
-          <p className="text-xl text-slate-400 font-light flex items-center flex-wrap gap-2">
-            {property.name} 
-            <span className="text-xs font-mono font-medium bg-slate-800 text-slate-400 px-2 py-1 rounded">
-              ID: {property.id}
+          <p className="text-slate-400 font-medium">Deal ID: {propertyId}</p>
+          
+          <div className="w-full h-64 md:h-96 bg-slate-800 animate-pulse rounded-2xl flex items-center justify-center border border-slate-700/50">
+            <span className="text-slate-500 content-center flex gap-2 items-center">
+              <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
+              Awaiting Visual Assets
             </span>
-          </p>
+          </div>
         </header>
 
-        {/* Financials Modeling Grid */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 lg:gap-8">
+        {/* Task 3: Calculator Section (Grid Layout) */}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-12">
           
-          {/* Left Column: Scenario Inputs */}
-          <div className="bg-slate-900 rounded-2xl p-6 sm:p-8 border border-slate-800 shadow-xl shadow-black/40">
-            <h2 className="text-2xl font-semibold mb-8 flex items-center text-slate-200 border-b border-slate-800 pb-4">
-              <span className="bg-slate-800/80 p-2 rounded-lg mr-3 text-emerald-400">
-                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4"></path></svg>
-              </span>
-              Scenario Modeling
+          {/* Left Column (Inputs) */}
+          <div className="bg-slate-900/40 backdrop-blur-md rounded-2xl p-8 border border-slate-800/80 shadow-2xl space-y-8">
+            <h2 className="text-2xl font-semibold mb-6 text-slate-200 border-b border-slate-800/80 pb-4">
+              Financial Assumptions
             </h2>
 
-            <div className="space-y-10">
-              {/* Static Value: Local Market Price */}
+            <div className="space-y-8">
+              {/* Slider: Exchange Rate */}
               <div>
-                <label className="block text-sm font-medium text-slate-400 mb-2 uppercase tracking-wide">
-                  Local Market Price (NGN)
-                </label>
-                <div className="text-3xl font-bold text-white font-mono">
-                  {formatCurrency(property.priceNGN, 'NGN')}
-                </div>
-              </div>
-
-              {/* Slider 1: Exchange Rate */}
-              <div>
-                <div className="flex items-end justify-between mb-3 border-t border-slate-800 pt-6">
-                  <label htmlFor="exchangeRate" className="text-sm font-medium text-slate-300">
-                    Expected FX Rate <span className="text-slate-500 font-normal">(NGN/USD)</span>
+                <div className="flex justify-between items-center mb-4">
+                  <label htmlFor="exchangeRate" className="text-sm font-medium text-slate-400">
+                    FX Exchange Rate (NGN/USD)
                   </label>
-                  <span className="text-emerald-400 font-mono font-medium text-base bg-emerald-400/10 px-3 py-1 rounded-md">
+                  <span className="text-emerald-400 font-mono font-medium bg-emerald-500/10 px-3 py-1.5 rounded-lg border border-emerald-500/20">
                     ₦{exchangeRate}
                   </span>
                 </div>
                 <input 
                   id="exchangeRate"
                   type="range" 
-                  min="1000" 
+                  min="800" 
                   max="2000" 
-                  step="5"
+                  step="10"
                   value={exchangeRate}
                   onChange={(e) => setExchangeRate(Number(e.target.value))}
-                  className="w-full h-2.5 bg-slate-800 rounded-lg appearance-none cursor-pointer accent-emerald-500 hover:accent-emerald-400 focus:outline-none focus:ring-2 focus:ring-emerald-500/20 transition-all"
+                  className="w-full h-2 bg-slate-800 rounded-lg appearance-none cursor-pointer accent-emerald-500 transition-all hover:accent-emerald-400"
                 />
               </div>
 
-              {/* Slider 2: Projected Rent */}
+              {/* Slider: Annual Rent */}
               <div>
-                <div className="flex items-end justify-between mb-3 border-t border-slate-800 pt-6">
-                  <label htmlFor="projectedRentUSD" className="text-sm font-medium text-slate-300">
-                    Projected Annual Rent <span className="text-slate-500 font-normal">(USD)</span>
+                <div className="flex justify-between items-center mb-4">
+                  <label htmlFor="annualRent" className="text-sm font-medium text-slate-400">
+                    Projected Annual Rent (USD)
                   </label>
-                  <span className="text-emerald-400 font-mono font-medium text-base bg-emerald-400/10 px-3 py-1 rounded-md">
-                    {formatCurrency(projectedRentUSD, 'USD')}
+                  <span className="text-emerald-400 font-mono font-medium bg-emerald-500/10 px-3 py-1.5 rounded-lg border border-emerald-500/20">
+                    {formatCurrency(annualRent, 'USD')}
                   </span>
                 </div>
                 <input 
-                  id="projectedRentUSD"
+                  id="annualRent"
                   type="range" 
                   min="5000" 
-                  max="40000" 
+                  max="30000" 
                   step="500"
-                  value={projectedRentUSD}
-                  onChange={(e) => setProjectedRentUSD(Number(e.target.value))}
-                  className="w-full h-2.5 bg-slate-800 rounded-lg appearance-none cursor-pointer accent-emerald-500 hover:accent-emerald-400 focus:outline-none focus:ring-2 focus:ring-emerald-500/20 transition-all"
+                  value={annualRent}
+                  onChange={(e) => setAnnualRent(Number(e.target.value))}
+                  className="w-full h-2 bg-slate-800 rounded-lg appearance-none cursor-pointer accent-emerald-500 transition-all hover:accent-emerald-400"
+                />
+              </div>
+
+              {/* Slider: Renovation Costs */}
+              <div>
+                <div className="flex justify-between items-center mb-4 border-t border-slate-800/80 pt-6">
+                  <label htmlFor="renovationCosts" className="text-sm font-medium text-slate-400">
+                    Renovation & Soft Costs (USD)
+                  </label>
+                  <span className="text-emerald-400 font-mono font-medium bg-emerald-500/10 px-3 py-1.5 rounded-lg border border-emerald-500/20">
+                    {formatCurrency(renovationCosts, 'USD')}
+                  </span>
+                </div>
+                <input 
+                  id="renovationCosts"
+                  type="range" 
+                  min="0" 
+                  max="50000" 
+                  step="1000"
+                  value={renovationCosts}
+                  onChange={(e) => setRenovationCosts(Number(e.target.value))}
+                  className="w-full h-2 bg-slate-800 rounded-lg appearance-none cursor-pointer accent-emerald-500 transition-all hover:accent-emerald-400"
                 />
               </div>
             </div>
           </div>
 
-          {/* Right Column: Calculations & Call to Action */}
-          <div className="flex flex-col gap-6 lg:gap-8">
+          {/* Right Column (Outputs & CTA) */}
+          <div className="flex flex-col gap-6">
             
-            {/* Projected Returns Card */}
-            <div className="bg-gradient-to-br from-slate-900 to-slate-800 rounded-2xl p-6 sm:p-8 relative overflow-hidden border border-slate-700/50 shadow-xl shadow-black/40">
-              <div className="absolute top-0 right-0 p-6 opacity-10 text-emerald-500">
+            {/* Metric Card: Total USD Cost */}
+            <div className="bg-slate-900/60 backdrop-blur-xl rounded-2xl p-8 border border-slate-700/50 shadow-2xl relative overflow-hidden group">
+              <div className="absolute top-0 right-0 p-6 opacity-[0.03] text-emerald-500 transition-opacity group-hover:opacity-10 duration-500">
                 <svg className="w-32 h-32 transform translate-x-4 -translate-y-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1} d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
               </div>
-              
-              <div className="relative z-10 space-y-8">
-                <div>
-                  <h3 className="text-sm font-semibold text-slate-400 uppercase tracking-widest mb-3 flex items-center gap-2">
-                    <div className="w-2 h-2 rounded-full bg-blue-500/50"></div>
-                    Est. USD Acquisition Cost
-                  </h3>
-                  <div className="text-4xl sm:text-5xl font-bold text-white font-mono tracking-tight">
-                    {formatCurrency(acquisitionCostUSD, 'USD')}
-                  </div>
-                </div>
+              <h3 className="text-sm font-semibold text-slate-400 uppercase tracking-widest mb-3 flex items-center gap-2 relative z-10">
+                <div className="w-2 h-2 rounded-full bg-blue-500/50 shadow-[0_0_8px_rgba(59,130,246,0.5)]"></div>
+                Total USD Cost
+              </h3>
+              <div className="text-5xl sm:text-6xl font-bold text-white tracking-tight relative z-10 font-mono">
+                {formatCurrency(usdAcquisitionCost, 'USD')}
+              </div>
+              <p className="text-xs text-slate-500 mt-4 relative z-10 uppercase font-medium tracking-wider">
+                Base Asset (₦{askingPriceNGN.toLocaleString()}) + Renovations
+              </p>
+            </div>
 
-                <div>
-                  <h3 className="text-sm font-semibold text-slate-400 uppercase tracking-widest mb-3 flex items-center gap-2">
-                    <div className="w-2 h-2 rounded-full bg-emerald-500"></div>
-                    Projected Cash-on-Cash ROI
-                  </h3>
-                  <div className="text-5xl sm:text-6xl font-black text-transparent bg-clip-text bg-gradient-to-r from-emerald-400 to-emerald-300 drop-shadow-sm font-mono filter drop-shadow-[0_0_15px_rgba(52,211,153,0.3)]">
-                    {cashOnCashROI.toFixed(1)}%
-                  </div>
-                </div>
+            {/* Metric Card: Cash-on-Cash ROI */}
+            <div className="bg-slate-900/60 backdrop-blur-xl rounded-2xl p-8 border border-emerald-500/30 shadow-[0_0_30px_rgba(16,185,129,0.05)] relative overflow-hidden flex-grow flex flex-col justify-center">
+              <h3 className="text-sm font-semibold text-slate-400 uppercase tracking-widest mb-3 flex items-center gap-2 relative z-10">
+                <div className="w-2 h-2 rounded-full bg-emerald-500 shadow-[0_0_8px_rgba(16,185,129,0.8)]"></div>
+                Projected Yield (CoC)
+              </h3>
+              <div className="text-7xl font-black text-transparent bg-clip-text bg-gradient-to-r from-emerald-400 to-emerald-200 drop-shadow-sm filter drop-shadow-[0_0_20px_rgba(52,211,153,0.2)] font-mono relative z-10">
+                {cashOnCashROI.toFixed(1)}%
               </div>
             </div>
 
-            {/* Action Box */}
-            <div className="bg-slate-900 rounded-2xl p-6 sm:p-8 border border-slate-800 shadow-xl shadow-black/40 flex-grow flex flex-col justify-center">
-              <p className="text-sm text-slate-400 mb-6 leading-relaxed">
-                Review the simulated returns based on your dynamic metrics. If this arbitrage opportunity aligns with your fund's investment thesis, lock in the pricing now.
-              </p>
-              
-              <button
-                onClick={handleReserve}
-                disabled={isReserving}
-                className="group relative w-full overflow-hidden rounded-xl bg-emerald-600 px-6 py-4 text-center font-semibold text-white shadow-[0_0_20px_rgba(5,150,105,0.3)] transition-all hover:bg-emerald-500 hover:shadow-[0_0_30px_rgba(5,150,105,0.5)] active:scale-[0.98] disabled:scale-100 disabled:opacity-70 disabled:cursor-not-allowed disabled:hover:bg-emerald-600 disabled:hover:shadow-none"
-              >
-                <div className="absolute inset-0 w-full h-full bg-gradient-to-r from-transparent via-white/20 to-transparent -translate-x-full group-hover:animate-[shimmer_1.5s_infinite]"></div>
-                {isReserving ? (
-                  <span className="flex items-center justify-center gap-2">
-                    <svg className="animate-spin h-5 w-5 text-white/80" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                      <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                      <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                    </svg>
-                    Processing Request...
-                  </span>
-                ) : (
-                  'Reserve Asset & Request Escrow'
-                )}
-              </button>
-            </div>
-          </div>
+            {/* CTA Button */}
+            <button
+              onClick={handleReserve}
+              className="mt-2 w-full relative overflow-hidden rounded-xl bg-emerald-600 px-6 py-5 text-center font-bold text-white shadow-[0_0_20px_rgba(5,150,105,0.3)] transition-all hover:bg-emerald-500 hover:shadow-[0_0_30px_rgba(5,150,105,0.5)] hover:-translate-y-0.5 active:translate-y-0 active:scale-[0.98] text-lg uppercase tracking-wider"
+            >
+              Reserve Asset & Request Escrow Instructions
+            </button>
 
+          </div>
         </div>
       </div>
-
-      {/* Global Scoped Toast Styling / Animations */}
-      <style dangerouslySetInnerHTML={{__html: `
-        @keyframes slideInUp {
-          from { transform: translateY(20px); opacity: 0; }
-          to { transform: translateY(0); opacity: 1; }
-        }
-        @keyframes shimmer {
-          100% { transform: translateX(100%); }
-        }
-        .animate-toast {
-          animation: slideInUp 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards;
-        }
-      `}} />
-
-      {/* Toast Notification Container */}
-      {showToast && (
-        <div className="fixed bottom-6 right-6 z-50 animate-toast">
-          <div className="bg-slate-800 border border-emerald-500/30 text-white px-5 py-4 rounded-xl shadow-[0_10px_40px_rgba(0,0,0,0.5)] flex items-start gap-4 backdrop-blur-md">
-            <div className="mt-0.5 h-8 w-8 shrink-0 bg-emerald-500/20 rounded-full flex items-center justify-center text-emerald-400">
-              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7"></path></svg>
-            </div>
-            <div>
-              <p className="font-semibold text-emerald-400 tracking-wide">Asset Reserving Initiated</p>
-              <p className="text-sm text-slate-300 mt-1">Escrow wire instructions have been dispatched securely to your registered email.</p>
-            </div>
-            <button 
-              onClick={() => setShowToast(false)}
-              className="ml-2 text-slate-500 hover:text-slate-300 transition-colors"
-            >
-              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12"></path></svg>
-            </button>
-          </div>
-        </div>
-      )}
-
     </div>
   );
 }
