@@ -8,7 +8,7 @@ from typing import Optional, Dict, Any, List
 from dotenv import load_dotenv
 load_dotenv('.env.local')
 
-from google import generativeai as genai
+from google import genai
 import firebase_admin
 from firebase_admin import credentials, firestore
 
@@ -95,9 +95,7 @@ def run_deal_analyst(state: LeadState) -> LeadState:
     if not gemini_api_key:
         raise ValueError("GEMINI_API_KEY is missing in environment variables.")
         
-    genai.configure(api_key=gemini_api_key)
-
-    model = genai.GenerativeModel('gemini-1.5-pro')
+    client = genai.Client(api_key=gemini_api_key)
     
     prompt = f"""
     You are an elite Real Estate Analyst for Empathy Manor. Your job is to filter scraped lead data to find high-net-worth Nigerian diaspora professionals (e.g., physicians, tech founders) based in the US or UK.
@@ -120,15 +118,20 @@ def run_deal_analyst(state: LeadState) -> LeadState:
     Return ONLY a JSON object: {{"quality_score": <number>, "reasoning": "<1 sentence explanation>"}}.
     """
     
-    response = model.generate_content(
-        prompt,
-        generation_config=genai.GenerationConfig(
-            response_mime_type="application/json",
-        )
-    )
+    response = client.models.generate_content(model='gemini-1.5-pro', contents=prompt)
     
     try:
-        analysis = json.loads(response.text)
+        raw_text = response.text.strip()
+        if raw_text.startswith("```json"):
+            raw_text = raw_text[7:]
+            if raw_text.endswith("```"):
+                raw_text = raw_text[:-3]
+        elif raw_text.startswith("```"):
+            raw_text = raw_text[3:]
+            if raw_text.endswith("```"):
+                raw_text = raw_text[:-3]
+                
+        analysis = json.loads(raw_text.strip())
         state.quality_score = int(analysis.get("quality_score", 0))
         state.reasoning = analysis.get("reasoning", "No valid reasoning parsed.")
         logger.info(f"DealAnalyst: Scored {state.normalized_data.name} -> {state.quality_score}/10")
