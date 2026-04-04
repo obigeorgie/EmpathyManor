@@ -157,7 +157,7 @@ export default function Home() {
           <div className="shrink-0 flex flex-col items-center">
             <div className="relative w-32 h-32 rounded-full overflow-hidden border-2 border-emerald-500/30 shadow-[0_0_30px_-5px_var(--color-emerald-500)] mb-4">
               <Image 
-                src="/nnamdi-profile.jpg" 
+                src="/nnamdi-profile.png" 
                 alt="Nnamdi Okorafor - Managing Partner" 
                 fill 
                 className="object-cover"
