@@ -1,84 +1,81 @@
 import os
 import json
 import datetime
+from fastapi import FastAPI, HTTPException, Header
+from pydantic import BaseModel
 import firebase_admin
 from firebase_admin import credentials, firestore
 from google import genai
-from google.genai import types
+from dotenv import load_dotenv
 
-# Task 1: Environment & SDKs Initialization
-# Ensure Firebase app initializes correctly if not already initialized
+# Load Environment
+load_dotenv('.env.local')
+
+# Initialize Firebase (Only if not already initialized)
 if not firebase_admin._apps:
-    # This automatically picks up GOOGLE_APPLICATION_CREDENTIALS if set in the environment
-    firebase_admin.initialize_app()
+    # Assuming you have a serviceAccountKey.json, or using default credentials
+    # cred = credentials.Certificate("path/to/serviceAccountKey.json")
+    # firebase_admin.initialize_app(cred)
+    firebase_admin.initialize_app() 
 
 db = firestore.client()
 
-# Task 2: Define the Simulated Inbound Payload
-incoming_fem_drop = {
-    "agent": "FEM Limited",
-    "property_title": "5-Bedroom Detached Duplex, Lekki Phase 1",
-    "asking_price_ngn": 250000000,
-    "projected_usd_rent": 18000,
-    "title_status": "Governor's Consent - Verified",
-    "notes": "Owner relocating, highly motivated."
-}
+# Initialize API
+app = FastAPI(title="Empathy Manor Intake API")
 
-# Task 3: Build the Underwriter Agent
-def evaluate_and_ingest(payload):
-    print("Initiating Deal Evaluation via Gemini Underwriter Agent...")
+# Define the expected data from Tally
+class FEMPayload(BaseModel):
+    property_title: str
+    asking_price_ngn: int
+    projected_usd_rent: int
+    title_status: str
+    notes: str = ""
+
+# The API Security Key (Set this in your .env.local file: TALLY_WEBHOOK_SECRET="your_custom_secret")
+WEBHOOK_SECRET = os.environ.get("TALLY_WEBHOOK_SECRET", "default_secret_please_change")
+
+@app.post("/ingest")
+async def evaluate_and_ingest(payload: FEMPayload, x_api_key: str = Header(None)):
+    # 1. Security Check
+    if x_api_key != WEBHOOK_SECRET:
+        raise HTTPException(status_code=401, detail="Unauthorized request")
+
+    # 2. Setup AI Underwriter
+    gemini_api_key = os.environ.get("GEMINI_API_KEY")
+    client = genai.Client(api_key=gemini_api_key)
     
-    # Initialize the modern Gemini SDK client
-    client = genai.Client()
-
-    # The System Prompt as specified
-    system_instruction = (
-        "You are the Director of Acquisitions for Empathy Manor. "
-        "Evaluate the following property data from our ground team. "
-        "Current exchange rate is roughly 1378 NGN/USD. "
-        "Calculate the USD acquisition cost and the Cash-on-Cash ROI. "
-        'If the ROI is greater than 10% AND the title_status contains "Consent" or "C of O", '
-        'respond with exactly: "APPROVED". Otherwise, respond with "REJECTED" and a brief reason.'
+    prompt = f"""
+    You are the Director of Acquisitions for Empathy Manor. Evaluate this property data.
+    Exchange rate: ~1378 NGN/USD. 
+    Calculate USD acquisition cost and Cash-on-Cash ROI. 
+    If ROI is > 10% AND title_status contains 'Consent' or 'C of O', respond EXACTLY with: 'APPROVED'. 
+    Otherwise, respond with 'REJECTED' and the reason.
+    
+    Data: {payload.model_dump_json()}
+    """
+    
+    # 3. AI Evaluation
+    response = client.models.generate_content(
+        model='gemini-2.5-flash', 
+        contents=prompt
     )
-
-    try:
-        # Call the Gemini API with the system instructions and payload data
-        response = client.models.generate_content(
-            model='gemini-2.5-flash',
-            contents=json.dumps(payload),
-            config=types.GenerateContentConfig(
-                system_instruction=system_instruction
-            )
-        )
+    decision = response.text.strip()
+    
+    # 4. Routing the Decision
+    if decision.startswith("APPROVED"):
+        doc_ref = db.collection("properties").document()
+        doc_data = payload.model_dump()
+        doc_data["timestamp"] = firestore.SERVER_TIMESTAMP
+        doc_data["status"] = "Active"
+        doc_ref.set(doc_data)
         
-        # Extract verbatim text string from GenAI Output
-        verdict = response.text.strip()
-        
-        # Task 4: The Firebase Push pipeline
-        if verdict.startswith("APPROVED"):
-            # Enqueue payload transformations
-            ingestion_payload = payload.copy()
-            ingestion_payload["status"] = "Active"
-            ingestion_payload["timestamp"] = datetime.datetime.utcnow().isoformat()
-            
-            # Map required frontend Deal Room fields cleanly
-            ingestion_payload["title"] = payload["property_title"]
-            
-            # Commit to Firestore 
-            doc_ref = db.collection("properties").document()
-            doc_ref.set(ingestion_payload)
-            
-            print("✅ ASSET APPROVED & INGESTED. Deal Room Portal is now live for this property.")
-            print(f"🔗 View Deal ID Generated: {doc_ref.id}")
-        else:
-            # Clean up reason payload if rejected
-            reason = verdict.replace("REJECTED", "").strip(":. \n")
-            if not reason:
-                reason = "Did not meet strict ROI or Title verification thresholds."
-            print(f"🚨 ASSET REJECTED BY AI: {reason}")
-            
-    except Exception as e:
-        print(f"❌ PIPELINE ERROR: A critical failure occurred within the supply chain: {str(e)}")
+        print(f"✅ ASSET APPROVED & INGESTED. ID: {doc_ref.id}")
+        return {"status": "success", "message": "Asset approved and pushed to Deal Room", "id": doc_ref.id}
+    else:
+        print(f"🚨 ASSET REJECTED BY AI: {decision}")
+        return {"status": "rejected", "message": decision}
 
 if __name__ == "__main__":
-    evaluate_and_ingest(incoming_fem_drop)
+    import uvicorn
+    # Runs the server on port 8000
+    uvicorn.run(app, host="0.0.0.0", port=8000)
